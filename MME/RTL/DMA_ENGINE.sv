@@ -83,11 +83,11 @@ module DMA_ENGINE
                     state_n = READ_A;
             end
             READ_A: begin
-                if (a_read_count == SA_WIDTH)
+                if (a_read_count == SA_WIDTH - 1)
                     state_n = READ_B;
             end
             READ_B: begin
-                if (b_read_count == SA_WIDTH)
+                if (b_read_count == SA_WIDTH - 1)
                     state_n = WAIT_MM;
             end
             WAIT_MM: begin
@@ -95,7 +95,7 @@ module DMA_ENGINE
                     state_n = WRITE_C;
             end
             WRITE_C: begin
-                if (c_write_count == SA_WIDTH)
+                if (c_write_count == SA_WIDTH - 1)
                     state_n = IDLE;
             end
         endcase
@@ -171,9 +171,11 @@ module DMA_ENGINE
         end
     end
 
-    // AXI read and write operations 
-    assign buf_a_waddr_o = buf_a_addr;
-    assign buf_b_waddr_o = buf_b_addr;
+    $display("state: %d, state_n: %d\n", state, state_n);
+    $display("a_read_count: %d, b_read_count: %d, c_write_count: %d\n", a_read_count, b_read_count, c_write_count);
+    $display("buf_a_addr: %d, buf_b_addr: %d, buf_c_addr: %d\n", buf_a_addr, buf_b_addr, buf_c_addr);
+
+    
     assign buf_a_wdata_o = buf_a_data;
     assign buf_b_wdata_o = buf_b_data;
 
