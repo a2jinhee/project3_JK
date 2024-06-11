@@ -66,7 +66,6 @@ addrmap MME_CFG {
 			sw = w;
 			hw = r; // check
             singlepulse;
-            reset = 1'b0;
         } start;
     } MME_CMD @0x20C;	
 
@@ -77,6 +76,7 @@ addrmap MME_CFG {
                 Software must not initiate a MM when this field is 0.";
             sw = r;
 			hw = w; // check
+            reset = 1'b1;
         } done;
     } MME_STATUS @0x210;		
 
