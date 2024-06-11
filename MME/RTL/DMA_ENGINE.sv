@@ -60,7 +60,7 @@ module DMA_ENGINE
     //// CHANGES ////
 
     // Internal states for FSM
-    typedef enum logic [1:0] {
+    typedef enum logic [2:0] {
         IDLE,
         READ_A,
         READ_B,
