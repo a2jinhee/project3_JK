@@ -1,0 +1,33 @@
+#!/bin/bash
+
+CSR_CMD='/home/ScalableArchiLab/bin/peakrdl'
+RUN_DIR=./OUTPUT
+RDL_FILE="$(basename "$1")"
+RDL_NAME="${RDL_FILE%.*}"
+
+
+if [ "$#" == 1 ]; then
+        RDL_INPUT="$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
+else
+        echo "Usage: ./run.rdl rdl_script"
+        exit 1
+fi
+
+if [ ! -d "$RUN_DIR" ]; then
+        echo "Creating a new out directory: ${RUN_DIR}"
+        mkdir $RUN_DIR
+fi
+
+
+echo "Creating SystemVerilog, HTML, UVM, IP_XACT files..."
+### Generate synthesizable SystemVerilog
+$CSR_CMD regblock $RDL_INPUT -o $RUN_DIR --top ${RDL_NAME}_CFG --cpuif apb3-flat --peakrdl-cfg peakrdl.toml --addr-width 10
+### Generate C Header
+# $CSR_CMD c-header $RDL_INPUT -o $RUN_DIR/${RDL_NAME}_CFG.h
+### Generate HTML
+# $CSR_CMD html $RDL_INPUT -o $RUN_DIR/html_out/
+### Generate UVM
+# $CSR_CMD uvm $RDL_INPUT -o $RUN_DIR/${RDL_NAME}_uvm_pkg.sv
+### Generate IP_XACT
+# $CSR_CMD ip-xact $RDL_INPUT -o $RUN_DIR/${RDL_NAME}.xml
+echo "Completed"

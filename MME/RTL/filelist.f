@@ -1,0 +1,10 @@
+-sverilog $LAB_PATH/RDL/OUTPUT/MME_CFG_pkg.sv
+-sverilog $LAB_PATH/RDL/OUTPUT/MME_CFG.sv
+-sverilog $LAB_PATH/RTL/AXI_INTF.sv
+-sverilog $LAB_PATH/RTL/DUAL_PORT_SRAM.sv
+-sverilog $LAB_PATH/RTL/DMA_ENGINE.sv
+-sverilog $LAB_PATH/RTL/DATA_PROVIDER.sv
+-sverilog $LAB_PATH/RTL/PE.sv
+-sverilog $LAB_PATH/RTL/SYSTOLIC_ARRAY.sv
+-sverilog $LAB_PATH/RTL/MM_ENGINE.sv
+-sverilog $LAB_PATH/RTL/MME_TOP.sv

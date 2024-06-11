@@ -1,0 +1,11 @@
+// Copyright (c) 2021 Sungkyunkwan University
+//
+// Authors:
+// - Jungrae Kim <dale40@skku.edu>
+
+addrmap MME_CFG {
+    name = "Matrix Multiplication Engine address map";
+    desc = "Address map of ECE4278 Matrix Multiplication Engine project";
+
+    // TODO: implement me
+};
