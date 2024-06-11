@@ -138,8 +138,8 @@ module DMA_ENGINE
 
     // AXI read and write operations (simplified for brevity)
     // Assign buffer addresses and data
-    assign buf_a_waddr_o = a_addr;
-    assign buf_b_waddr_o = b_addr;
+    assign buf_a_waddr_o = buf_a_addr;
+    assign buf_b_waddr_o = buf_b_addr;
 
     // FSM output logic
     always @(posedge clk or negedge rst_n) begin
@@ -166,7 +166,7 @@ module DMA_ENGINE
                     mm_start_o <= 1;
                 end
                 WRITE_C: begin
-                    axi_aw_if.awaddr <= c_addr;
+                    axi_aw_if.awaddr <= buf_c_addr;
                     axi_w_if.wdata <= accum_i;  // Assuming accum_i provides the computed data
                     axi_w_if.wvalid <= 1;
                     if (c_write_count == SA_WIDTH - 1)
