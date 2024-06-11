@@ -66,7 +66,8 @@ module DMA_ENGINE
 
     reg [2:0] state, state_n;
     reg [7:0] a_read_count, b_read_count, c_write_count;
-    reg [31:0] a_addr, b_addr, c_addr;
+    reg [BUF_AW-1:0] buf_a_addr, buf_b_addr, buf_c_addr;
+    reg [BUF_DW-1:0] buf_a_data, buf_b_data;
     
     always_ff @(posedge clk)
         if (!rst_n)
@@ -106,30 +107,30 @@ module DMA_ENGINE
             a_read_count <= 0;
             b_read_count <= 0;
             c_write_count <= 0;
-            a_addr <= 0;
-            b_addr <= 0;
-            c_addr <= 0;
+            buf_a_addr <= 0;
+            buf_b_addr <= 0;
+            buf_c_addr <= 0;
         end else begin
             case (state)
                 READ_A: begin
                     a_read_count <= a_read_count + 1;
-                    a_addr <= a_addr + a_read_count * DW / 8; // byte address
+                    buf_a_addr <= buf_a_addr + a_read_count * DW / 8; // byte address
                 end
                 READ_B: begin
                     b_read_count <= b_read_count + 1;
-                    b_addr <= b_addr + b_read_count * DW / 8;
+                    buf_b_addr <= buf_b_addr + b_read_count * DW / 8;
                 end
                 WRITE_C: begin
                     c_write_count <= c_write_count + 1;
-                    c_addr <= c_addr + c_write_count * DW / 8;
+                    buf_c_addr <= buf_c_addr + c_write_count * DW / 8;
                 end
                 default: begin
                     a_read_count <= 0;
                     b_read_count <= 0;
                     c_write_count <= 0;
-                    a_addr <= mat_a_addr_i;
-                    b_addr <= mat_b_addr_i;
-                    c_addr <= mat_c_addr_i;
+                    buf_a_addr <= mat_a_addr_i;
+                    buf_b_addr <= mat_b_addr_i;
+                    buf_c_addr <= mat_c_addr_i;
                 end
             endcase
         end
