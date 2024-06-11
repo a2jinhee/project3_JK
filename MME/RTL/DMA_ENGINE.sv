@@ -167,7 +167,7 @@ module DMA_ENGINE
                 end
                 WRITE_C: begin
                     axi_aw_if.awaddr <= buf_c_addr;
-                    axi_w_if.wdata <= accum_i;  // Assuming accum_i provides the computed data
+                    axi_w_if.wdata <= accum_i[c_write_count / SA_WIDTH][c_write_count % SA_WIDTH];  // Assuming accum_i provides the computed data
                     axi_w_if.wvalid <= 1;
                     if (c_write_count == SA_WIDTH - 1)
                         done_o <= 1;
