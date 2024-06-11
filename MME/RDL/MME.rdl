@@ -78,7 +78,6 @@ addrmap MME_CFG {
             sw = r;
 			hw = w; // check
         } done;
-    } DMA_STATUS @0x210;		
-
+    } MME_STATUS @0x210;		
 
 };
