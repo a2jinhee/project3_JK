@@ -147,6 +147,14 @@ module DMA_ENGINE
             buf_b_wren_o <= 0;
             mm_start_o <= 0;
             done_o <= 0;
+
+            buf_a_data <= 0;
+            buf_b_data <= 0;
+
+            axi_aw_if.awaddr <= 0;
+            axi_w_if.wdata <= 0;
+            axi_w_if.wvalid <= 0;
+
         end else begin
             buf_a_wren_o <= 0;
             buf_b_wren_o <= 0;
@@ -175,8 +183,6 @@ module DMA_ENGINE
         end
         
     end
-
-    
 
     
     assign buf_a_wdata_o = buf_a_data;
