@@ -65,6 +65,8 @@ module DMA_ENGINE
                 WRITE_C     = 3'b100;
 
     reg [2:0] state, state_n;
+    reg [7:0] a_read_count, b_read_count, c_write_count;
+    reg [31:0] a_addr, b_addr, c_addr
     
     always_ff @(posedge clk)
         if (!rst_n)
