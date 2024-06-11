@@ -65,8 +65,6 @@ addrmap MME_CFG {
 			   	Writing 0 to this field does not affect operation.";
 			sw = w;
 			hw = r; // check
-            singlepulse;
-            reset = 1'b0;
         } start;
     } MME_CMD @0x20C;	
 

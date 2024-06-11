@@ -99,11 +99,11 @@ module DMA_ENGINE
                     state_n = IDLE;
             end
         endcase
-        $display("start_i: %d, state: %d, state_n: %d\n", start_i, state, state_n);
     end
 
     // Counters and addresses
     always @(posedge clk) begin
+        $display("start_i: %d, state: %d, state_n: %d\n", start_i, state, state_n);
         if (!rst_n) begin
             a_read_count <= 0;
             b_read_count <= 0;
