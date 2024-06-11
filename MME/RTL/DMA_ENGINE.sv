@@ -134,9 +134,9 @@ module DMA_ENGINE
                 end
             endcase
         end
-        $display("state: %d, state_n: %d\n", state, state_n);
-        $display("a_read_count: %d, b_read_count: %d, c_write_count: %d\n", a_read_count, b_read_count, c_write_count);
-        $display("buf_a_addr: %d, buf_b_addr: %d, buf_c_addr: %d\n", buf_a_addr, buf_b_addr, buf_c_addr);
+        // $display("state: %d, state_n: %d\n", state, state_n);
+        // $display("a_read_count: %d, b_read_count: %d, c_write_count: %d\n", a_read_count, b_read_count, c_write_count);
+        // $display("buf_a_addr: %d, buf_b_addr: %d, buf_c_addr: %d\n", buf_a_addr, buf_b_addr, buf_c_addr);
     end
 
     // FSM output logic
