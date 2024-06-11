@@ -45,7 +45,7 @@ addrmap MME_CFG {
             desc = "The start address of matrix B";
             sw = rw;
             hw = r; // check
-            reset = 32'h0000_0000;
+            reset = 16'h0000;
         } start_addr[31:0];	// 32b field
     } MAT_B_ADDR @0x204;
 
@@ -54,7 +54,7 @@ addrmap MME_CFG {
             desc = "The start address of matrix C";
             sw = rw;
             hw = r; // check
-            reset = 32'h0000_0000;
+            reset = 16'h0000;
         } start_addr[31:0];	// 32b field
     } MAT_C_ADDR @0x208;
 
