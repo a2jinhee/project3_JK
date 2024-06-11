@@ -83,11 +83,11 @@ module DMA_ENGINE
                     state_n = READ_A;
             end
             READ_A: begin
-                if (a_read_count == mat_width_i*SA_WIDTH - 1)
+                if (a_read_count == SA_WIDTH)
                     state_n = READ_B;
             end
             READ_B: begin
-                if (b_read_count == mat_width_i*SA_WIDTH - 1)
+                if (b_read_count == SA_WIDTH)
                     state_n = WAIT_MM;
             end
             WAIT_MM: begin
@@ -95,7 +95,7 @@ module DMA_ENGINE
                     state_n = WRITE_C;
             end
             WRITE_C: begin
-                if (c_write_count == mat_width_i*SA_WIDTH - 1)
+                if (c_write_count == SA_WIDTH)
                     state_n = IDLE;
             end
         endcase
@@ -136,11 +136,6 @@ module DMA_ENGINE
         end
     end
 
-    // AXI read and write operations (simplified for brevity)
-    // Assign buffer addresses and data
-    assign buf_a_waddr_o = buf_a_addr;
-    assign buf_b_waddr_o = buf_b_addr;
-
     // FSM output logic
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -176,6 +171,9 @@ module DMA_ENGINE
         end
     end
 
+    // AXI read and write operations 
+    assign buf_a_waddr_o = buf_a_addr;
+    assign buf_b_waddr_o = buf_b_addr;
     assign buf_a_wdata_o = buf_a_data;
     assign buf_b_wdata_o = buf_b_data;
 
