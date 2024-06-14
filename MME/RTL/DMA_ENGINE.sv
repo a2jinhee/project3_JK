@@ -148,7 +148,7 @@ module DMA_ENGINE
                     if (axi_w_if.wlast)
                         c_write_count <= c_write_count + 1;
 
-                    axi_aw_if.awaddr <= mat_c_addr_i + c_read_count * 4 * (DW / 8); // byte address
+                    axi_aw_if.awaddr <= mat_c_addr_i + c_write_count * 4 * (DW / 8); // byte address
                     axi_aw_if.awvalid <= 1;
                 end
             endcase
