@@ -56,10 +56,12 @@ module DMA_ENGINE
 
     // FSM states
     localparam  IDLE        = 3'b000,
-                READ_A      = 3'b001,
-                READ_B      = 3'b010,
-                WAIT_MM     = 3'b011,
-                WRITE_C     = 3'b100;
+                ADDR_A      = 3'b001,
+                ADDR_B      = 3'b010,
+                LOAD        = 3'b011,
+                WAIT_MM     = 3'b100,
+                ADDR_C      = 3'b101,
+                WRITE_C     = 3'b110;
 
     reg [2:0] state, state_n;
     reg [BUF_DW-1:0] buf_a_data, buf_b_data;
@@ -120,7 +122,7 @@ module DMA_ENGINE
             count_a <= 0;
             count_b <= 0;
             count_c <= 0;
-            
+
         end else begin
             case (state)
 
