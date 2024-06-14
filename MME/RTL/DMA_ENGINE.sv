@@ -75,6 +75,8 @@ module DMA_ENGINE
         
     always_comb begin 
         state_n = state;
+        buf_a_wren_o <= 0;
+        buf_b_wren_o <= 0;
 
         case (state)
             IDLE: begin
@@ -118,10 +120,7 @@ module DMA_ENGINE
             count_a <= 0;
             count_b <= 0;
             count_c <= 0;
-
-            buf_a_wren_o <= 0;
-            buf_b_wren_o <= 0;
-
+            
         end else begin
             case (state)
 
