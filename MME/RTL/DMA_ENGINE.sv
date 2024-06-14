@@ -97,7 +97,7 @@ module DMA_ENGINE
                     state_n = WRITE_C;
             end
             WRITE_C: begin
-                if (c_write_count == mat_width_i - 1)
+                if (c_write_count == 3)
                     state_n = IDLE;
             end
         endcase
@@ -142,8 +142,15 @@ module DMA_ENGINE
                     axi_ar_if.arvalid <= 1;
                 end
                 WRITE_C: begin
-                    c_write_count <= c_write_count + 1;
-                    buf_c_addr <= buf_c_addr + c_write_count * DW / 8;
+                    axi_aw_if.arlen <= 16;
+                    axi_aw_if.arsize <= 4;
+                    axi_aw_if.arburst <= 1;
+
+                    if (axi_w_if.rlast)
+                        c_write_count <= c_write_count + 1;
+
+                    axi_aw_if.awaddr <= mat_b_addr_i + b_read_count * 4 * (DW / 8); // byte address
+                    axi_aw_if.awvalid <= 1;
                 end
             endcase
         end
@@ -195,13 +202,10 @@ module DMA_ENGINE
                     mm_start_o <= 1;
                 end
                 WRITE_C: begin
-                    axi_aw_if.awaddr <= buf_c_addr;
+                    axi_w_if.wready <= 1;
                     axi_w_if.wdata <= accum_i[c_write_count / SA_WIDTH][c_write_count % SA_WIDTH];  // Assuming accum_i provides the computed data
-                    
-                    axi_aw_if.awvalid <= 1;
-                    axi_w_if.wvalid <= 1;
 
-                    if (c_write_count == SA_WIDTH - 1)
+                    if (c_write_count == 3)
                         done_o <= 1;
                 end
             endcase
