@@ -235,7 +235,7 @@ module DMA_ENGINE
                 end
                 WRITE_C: begin
 
-                    axi_w_if.wdata <= accum_i[c_write_count];  // Assuming accum_i provides the computed data
+                    axi_w_if.wdata <= accum_i[c_write_count][c_write_count];  // Assuming accum_i provides the computed data
 
                     axi_w_if.wvalid <= 1;
 
