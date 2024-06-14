@@ -136,8 +136,8 @@ module DMA_ENGINE
 
                     b_read_count <= b_read_count + 1;
 
-                    axi_ar_if.awaddr <= mat_b_addr_i + b_read_count * 4 * (DW / 8); // byte address
-                    axi_ar_if.awvalid <= 1;
+                    axi_ar_if.araddr <= mat_b_addr_i + b_read_count * 4 * (DW / 8); // byte address
+                    axi_ar_if.arvalid <= 1;
                 end
                 WRITE_C: begin
                     c_write_count <= c_write_count + 1;
