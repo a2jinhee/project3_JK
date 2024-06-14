@@ -89,7 +89,7 @@ module DMA_ENGINE
                     state_n = READ_B;
             end
             READ_B: begin
-                if (b_read_count == SA_WIDTH - 1)
+                if (b_read_count == SA_WIDTH - 1 && axi_aw_if.awready && axi_aw_if.awvalid)
                     state_n = WAIT_MM;
             end
             WAIT_MM: begin
