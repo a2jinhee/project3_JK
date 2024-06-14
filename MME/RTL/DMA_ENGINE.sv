@@ -135,7 +135,8 @@ module DMA_ENGINE
                     axi_ar_if.arsize <= 4;
                     axi_ar_if.arburst <= 1;
 
-                    b_read_count <= b_read_count + 1;
+                    if (axi_r_if.rlast)
+                        b_read_count <= b_read_count + 1;
 
                     axi_ar_if.araddr <= mat_b_addr_i + b_read_count * 4 * (DW / 8); // byte address
                     axi_ar_if.arvalid <= 1;
