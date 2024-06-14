@@ -88,6 +88,7 @@ module DMA_ENGINE
                     // handshake with axi_if; 
                     // pass mat_b_addr_i + offset to axi_if to get mem_b data
                     state_n = READ_B;
+                    $display("### READ A");
                 else
                     state_n = READ_A;
             end
@@ -139,6 +140,7 @@ module DMA_ENGINE
 
                 end
                 READ_B: begin
+                    $display("READ_B!!!");
                     // axi command to read data from mat_a_addr_i + offset (burst for 128 bits = 16 bytes)
                     axi_ar_if.arlen <= 16;
                     axi_ar_if.arsize <= 4;
