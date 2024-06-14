@@ -216,13 +216,11 @@ module DMA_ENGINE
                     
                 end
                 READ_B: begin
-                    buf_b_wren_o <= 1;
                     axi_r_if.rready <= 1;
 
                     if (axi_r_if.rvalid)
                         buf_b_addr <= buf_b_addr + b_burst_count * (DW / 8);
                         buf_b_data <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
-
                         b_burst_count <= b_burst_count + 1;
                         if (b_burst_count == 3)
                             b_burst_count <= 0;
