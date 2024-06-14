@@ -109,12 +109,12 @@ module DMA_ENGINE
             a_read_count <= 0;
             b_read_count <= 0;
             c_write_count <= 0;
-            buf_a_addr <= 0;
-            buf_b_addr <= 0;
-            buf_c_addr <= 0;
 
             axi_ar_if.araddr <= 0;
             axi_ar_if.arvalid <= 0;
+            axi_aw_if.awaddr <= 0;
+            axi_aw_if.awvalid <= 0;
+
         end else begin
             case (state)
                 READ_A: begin
@@ -154,8 +154,8 @@ module DMA_ENGINE
                 end
             endcase
         end
-        $display("state: %d, state_n: %d\n", state, state_n);
-        $display("a_read_count: %d, b_read_count: %d, c_write_count: %d\n", a_read_count, b_read_count, c_write_count);
+        // $display("state: %d, state_n: %d\n", state, state_n);
+        // $display("a_read_count: %d, b_read_count: %d, c_write_count: %d\n", a_read_count, b_read_count, c_write_count);
         // $display("buf_a_addr: %d, buf_b_addr: %d, buf_c_addr: %d\n", buf_a_addr, buf_b_addr, buf_c_addr);
         // $display("mat_a_addr_i: %d, mat_b_addr_i: %d, mat_c_addr_i: %d\n", mat_a_addr_i, mat_b_addr_i, mat_c_addr_i);
     end
@@ -176,7 +176,6 @@ module DMA_ENGINE
             axi_w_if.wdata <= 0;
             axi_w_if.wvalid <= 0;
             axi_aw_if.awvalid <= 0;
-
 
         end else begin
             buf_a_wren_o <= 0;
@@ -212,14 +211,11 @@ module DMA_ENGINE
                 end
             endcase
         end
-        $display("buf_a_data: %d, buf_b_data: %d\n", buf_a_data, buf_b_data);
-        $display("axi_r_if.rdata: \n", axi_r_if.rdata);
+        // $display("buf_a_data: %d, buf_b_data: %d\n", buf_a_data, buf_b_data);
+        // $display("axi_r_if.rdata: \n", axi_r_if.rdata);
     end
 
 
-
-    assign buf_a_waddr_o = buf_a_addr;
-    assign buf_b_waddr_o = buf_b_addr;
     assign buf_a_wdata_o = buf_a_data;
     assign buf_b_wdata_o = buf_b_data;
 
