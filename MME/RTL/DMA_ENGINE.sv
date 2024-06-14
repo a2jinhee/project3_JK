@@ -248,8 +248,8 @@ module DMA_ENGINE
         $display("axi_r_if.rdata: \n", axi_r_if.rdata);
     end
 
-    assign buf_a_waddr_o = buf_a_addr;
-    assign buf_b_waddr_o = buf_b_addr;
+    assign buf_a_waddr_o = a_read_count;
+    assign buf_b_waddr_o = b_read_count;
 
     assign buf_a_wdata_o = buf_a_data;
     assign buf_b_wdata_o = buf_b_data;
