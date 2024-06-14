@@ -164,11 +164,11 @@ module DMA_ENGINE
             case (state)
                 READ_A: begin
                     buf_a_wren_o <= 1;
-                    buf_a_data_o <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
+                    buf_a_wdata_o <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
                 end
                 READ_B: begin
                     buf_b_wren_o <= 1;
-                    buf_b_data_o <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
+                    buf_b_wdata_o <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
                 end
                 WAIT_MM: begin
                     mm_start_o <= 1;
