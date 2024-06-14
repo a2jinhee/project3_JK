@@ -118,10 +118,11 @@ module DMA_ENGINE
         end else begin
             case (state)
                 READ_A: begin
-                    a_read_count <= a_read_count + 1;
-                    buf_a_addr <= buf_a_addr + a_read_count * DW / 8; // byte address
-                    axi_aw_if.awaddr <= mat_a_addr_i + a_read_count * DW / 8; // byte address
-                    axi_aw_if.awvalid <= 1;
+                    if (axi_aw_if.awready)
+                        a_read_count <= a_read_count + 1;
+                        buf_a_addr <= buf_a_addr + a_read_count * DW / 8; // byte address
+                        axi_aw_if.awaddr <= mat_a_addr_i + a_read_count * DW / 8; // byte address
+                        axi_aw_if.awvalid <= 1;
                 end
                 READ_B: begin
                     b_read_count <= b_read_count + 1;
