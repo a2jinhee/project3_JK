@@ -86,11 +86,11 @@ module DMA_ENGINE
                     state_n = ADDR_A;
             end
             ADDR_A: begin
-                if (axi.ar_if.arready)
+                if (axi_ar_if.arready)
                     state_n = ADDR_B;
             end
             ADDR_B: begin
-                if (axi.ar_if.arready)
+                if (axi_ar_if.arready)
                     state_n = LOAD;
             end
             LOAD: begin
@@ -102,7 +102,7 @@ module DMA_ENGINE
                     state_n = WRITE_C;
             end
             ADDR_C: begin
-                if (axi.aw_if.awready)
+                if (axi_aw_if.awready)
                     state_n = WRITE_C;
             end
             WRITE_C: begin
@@ -129,38 +129,38 @@ module DMA_ENGINE
                     // AR CHANNEL
                     // - output: arvalid, arid, araddr, arlen, arsize, arburst
                     // - input: arready
-                    axi.ar_if.arvalid <= 1; 
+                    axi_ar_if.arvalid <= 1; 
 
                     axi_ar_if.arlen <= 15;
                     axi_ar_if.arsize <= 4;
                     axi_ar_if.arburst <= 1;
-                    axi.ar_if.arid <= 0; 
-                    axi.ar_if.araddr <= mat_a_addr_i; 
+                    axi_ar_if.arid <= 0; 
+                    axi_ar_if.araddr <= mat_a_addr_i; 
 
                 end
                 ADDR_B: begin
                     // AR CHANNEL
                     // - output: arvalid, arid, araddr, arlen, arsize, arburst
                     // - input: arready
-                    axi.ar_if.arvalid <= 1;
+                    axi_ar_if.arvalid <= 1;
                     
                     axi_ar_if.arlen <= 15;
                     axi_ar_if.arsize <= 4;
                     axi_ar_if.arburst <= 1;
-                    axi.ar_if.arid <= 1;
-                    axi.ar_if.araddr <= mat_b_addr_i; 
+                    axi_ar_if.arid <= 1;
+                    axi_ar_if.araddr <= mat_b_addr_i; 
                 end
 
                 LOAD: begin
                     // R CHANNEL
                     // - output: rready
                     // - input: rvalid, rid, rdata, rlast
-                    axi.r_if.rready <= 1;
+                    axi_r_if.rready <= 1;
 
                     // buffer A - handshake && id
-                    if (axi.r_if.rready && axi.r_if.rvalid && axi.r_if.rid == 0) begin
+                    if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
                         buf_a_addr <= 0;
-                        buf_a_data[32*(count_a+1)-1 : 32*count_a] <= axi.r_if.rdata;
+                        buf_a_data[32*(count_a+1)-1 : 32*count_a] <= axi_r_if.rdata;
                         count_a <= count_a + 1;
                     end
 
@@ -171,9 +171,9 @@ module DMA_ENGINE
                     end
                     
                     // buffer B - handshake && id
-                    if (axi.r_if.rready && axi.r_if.rvalid && axi.r_if.rid == 1) begin
+                    if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
                         buf_b_addr <= 0;
-                        buf_b_data[32*(count_b+1)-1 : 32*count_b] <= axi.r_if.rdata;
+                        buf_b_data[32*(count_b+1)-1 : 32*count_b] <= axi_r_if.rdata;
                         count_b <= count_b + 1;
                     end
 
@@ -190,7 +190,7 @@ module DMA_ENGINE
                     // AW CHANNEL
                     // - output: awvalid, awid, awaddr, awlen, awsize, awburst
                     // - input: awready
-                    axi.aw_if.awvalid <= 1;
+                    axi_aw_if.awvalid <= 1;
 
                     axi_aw_if.awlen <= 15;
                     axi_aw_if.awsize <= 4;
@@ -204,9 +204,9 @@ module DMA_ENGINE
                     // W CHANNEL
                     // - output: wvalid, wid, wdata, wlast
                     // - input: wready
-                    axi.w_if.wvalid <= 1;
+                    axi_w_if.wvalid <= 1;
 
-                    if (axi.w_if.wready && axi.w_if.wvalid) begin
+                    if (axi_w_if.wready && axi_w_if.wvalid) begin
                         axi_w_if.wdata <= accum_i[count_c / 4][count_c % 4];
                         count_c <= count_c + 1;
                     end
