@@ -87,10 +87,14 @@ module DMA_ENGINE
                     // handshake with axi_if; 
                     // pass mat_b_addr_i + offset to axi_if to get mem_b data
                     state_n = READ_B;
+                else
+                    state_n = READ_A;
             end
             READ_B: begin
                 if (b_read_count == mat_width_i - 1)
                     state_n = WAIT_MM;
+                else
+                    state_n = READ_B;
             end
             WAIT_MM: begin
                 if (mm_done_i)
