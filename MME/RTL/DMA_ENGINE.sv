@@ -202,8 +202,10 @@ module DMA_ENGINE
                     mm_start_o <= 1;
                 end
                 WRITE_C: begin
-                    axi_w_if.wready <= 1;
+
                     axi_w_if.wdata <= accum_i[c_write_count / SA_WIDTH][c_write_count % SA_WIDTH];  // Assuming accum_i provides the computed data
+
+                    axi_w_if.wvalid <= 1;
 
                     if (c_write_count == 3)
                         done_o <= 1;
