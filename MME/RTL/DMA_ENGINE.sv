@@ -83,13 +83,13 @@ module DMA_ENGINE
                     state_n = READ_A;
             end
             READ_A: begin
-                if (a_read_count == SA_WIDTH - 1 && axi_aw_if.awready && axi_aw_if.awvalid)
+                if (a_read_count == SA_WIDTH * mat_width_i - 1 && axi_aw_if.awready && axi_aw_if.awvalid)
                     // handshake with axi_if; 
                     // pass mat_b_addr_i + offset to axi_if to get mem_b data
                     state_n = READ_B;
             end
             READ_B: begin
-                if (b_read_count == SA_WIDTH - 1 && axi_aw_if.awready && axi_aw_if.awvalid)
+                if (b_read_count == SA_WIDTH * mat_width_i - 1 && axi_aw_if.awready && axi_aw_if.awvalid)
                     state_n = WAIT_MM;
             end
             WAIT_MM: begin
@@ -97,7 +97,7 @@ module DMA_ENGINE
                     state_n = WRITE_C;
             end
             WRITE_C: begin
-                if (c_write_count == SA_WIDTH - 1)
+                if (c_write_count == SA_WIDTH * mat_width_i - 1)
                     state_n = IDLE;
             end
         endcase
