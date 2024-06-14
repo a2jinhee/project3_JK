@@ -83,7 +83,7 @@ module DMA_ENGINE
                     state_n = READ_A;
             end
             READ_A: begin
-                if ((a_read_count==mat_width_i - 1) && axi_aw_if.awready && axi_aw_if.awvalid)
+                if (a_read_count==mat_width_i - 1)
                     // handshake with axi_if; 
                     // pass mat_b_addr_i + offset to axi_if to get mem_b data
                     state_n = READ_B;
@@ -123,7 +123,8 @@ module DMA_ENGINE
                     axi_ar_if.arsize <= 4;
                     axi_ar_if.arburst <= 1;
 
-                    a_read_count <= a_read_count + 1;
+                    if (axi_r_if.rlast)
+                        a_read_count <= a_read_count + 1;
 
                     axi_ar_if.araddr <= mat_a_addr_i + a_read_count * 4 * (DW / 8); // byte address
                     axi_ar_if.arvalid <= 1;
