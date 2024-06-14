@@ -136,7 +136,7 @@ module DMA_ENGINE
                         a_read_count <= a_read_count + 1;
                         axi_ar_if.arvalid <= 1;
 
-                        buf_a_addr_o <= 0;
+                        buf_a_waddr_o <= 0;
                         buf_a_data_o <= buf_a_data;
                         buf_a_wren_o <= 1;
                 end
@@ -152,7 +152,7 @@ module DMA_ENGINE
                         b_read_count <= b_read_count + 1;
                         axi_ar_if.arvalid <= 1;
 
-                        buf_b_addr_o <= 0;
+                        buf_b_waddr_o <= 0;
                         buf_b_data_o <= buf_b_data;
                         buf_b_wren_o <= 1;
                 end
