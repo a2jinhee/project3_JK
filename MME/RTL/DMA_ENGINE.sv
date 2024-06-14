@@ -113,46 +113,35 @@ module DMA_ENGINE
             buf_b_addr <= 0;
             buf_c_addr <= 0;
 
-            axi_aw_if.awaddr <= 0;
-            axi_aw_if.awvalid <= 0;
+            axi_ar_if.awaddr <= 0;
+            axi_ar_if.awvalid <= 0;
         end else begin
             case (state)
                 READ_A: begin
                     // axi command to read data from mat_a_addr_i + offset (burst for 128 bits = 16 bytes)
-                    axi_aw_if.arlen <= 16;
-                    axi_aw_if.arsize <= 4;
-                    axi_aw_if.arburst <= 1;
+                    axi_ar_if.arlen <= 16;
+                    axi_ar_if.arsize <= 4;
+                    axi_ar_if.arburst <= 1;
 
                     a_read_count <= a_read_count + 1;
 
-                    axi_aw_if.awaddr <= mat_a_addr_i + a_read_count * 4 * (DW / 8); // byte address
-                    axi_aw_if.awvalid <= 1;
+                    axi_ar_if.araddr <= mat_a_addr_i + a_read_count * 4 * (DW / 8); // byte address
+                    axi_ar_if.arvalid <= 1;
                 end
                 READ_B: begin
                     // axi command to read data from mat_a_addr_i + offset (burst for 128 bits = 16 bytes)
-                    axi_aw_if.arlen <= 16;
-                    axi_aw_if.arsize <= 4;
-                    axi_aw_if.arburst <= 1;
+                    axi_ar_if.arlen <= 16;
+                    axi_ar_if.arsize <= 4;
+                    axi_ar_if.arburst <= 1;
 
                     b_read_count <= b_read_count + 1;
 
-                    axi_aw_if.awaddr <= mat_b_addr_i + b_read_count * 4 * (DW / 8); // byte address
-                    axi_aw_if.awvalid <= 1;
+                    axi_ar_if.awaddr <= mat_b_addr_i + b_read_count * 4 * (DW / 8); // byte address
+                    axi_ar_if.awvalid <= 1;
                 end
                 WRITE_C: begin
                     c_write_count <= c_write_count + 1;
                     buf_c_addr <= buf_c_addr + c_write_count * DW / 8;
-                end
-                default: begin
-                    a_read_count <= 0;
-                    b_read_count <= 0;
-                    c_write_count <= 0;
-                    buf_a_addr <= 0;
-                    buf_b_addr <= 0;
-                    buf_c_addr <= 0;
-
-                    axi_aw_if.awaddr <= 0;
-                    axi_aw_if.awvalid <= 0;
                 end
             endcase
         end
