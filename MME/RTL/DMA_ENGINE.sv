@@ -118,8 +118,9 @@ module DMA_ENGINE
             count_a <= 0;
             count_b <= 0;
             count_c <= 0;
-            
 
+            buf_a_wren_o <= 0;
+            buf_b_wren_o <= 0;
 
         end else begin
             case (state)
@@ -164,6 +165,7 @@ module DMA_ENGINE
                     end
 
                     if (count_a == 4) begin
+                        buf_a_wren_o <= 1;
                         count_a <= 0;
                         buf_a_addr <= buf_a_addr + 4;
                     end
@@ -176,6 +178,7 @@ module DMA_ENGINE
                     end
 
                     if (count_b == 4) begin
+                        buf_b_wren_o <= 1;
                         count_b <= 0;
                         buf_b_addr <= buf_b_addr + 4;
                     end
