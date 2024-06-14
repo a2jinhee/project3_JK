@@ -66,8 +66,9 @@ module DMA_ENGINE
 
     reg [2:0] state, state_n;
     reg [7:0] a_read_count, b_read_count, c_write_count;
-    reg [BUF_AW-1:0] buf_a_addr, buf_b_addr, buf_c_addr;
-    reg [BUF_DW-1:0] buf_a_data, buf_b_data;
+    // reg [BUF_AW-1:0] buf_a_addr, buf_b_addr, buf_c_addr;
+    reg [BUF_AW-1:0] buf_c_addr;
+    // reg [BUF_DW-1:0] buf_a_data, buf_b_data;
     
     always_ff @(posedge clk)
         if (!rst_n)
@@ -107,18 +108,18 @@ module DMA_ENGINE
             a_read_count <= 0;
             b_read_count <= 0;
             c_write_count <= 0;
-            buf_a_addr <= 0;
-            buf_b_addr <= 0;
+            buf_a_waddr_o <= 0;
+            buf_b_waddr_o <= 0;
             buf_c_addr <= 0;
         end else begin
             case (state)
                 READ_A: begin
                     a_read_count <= a_read_count + 1;
-                    buf_a_addr <= buf_a_addr + a_read_count * DW / 8; // byte address
+                    buf_a_waddr_o <= buf_a_waddr_o + a_read_count * DW / 8; // byte address
                 end
                 READ_B: begin
                     b_read_count <= b_read_count + 1;
-                    buf_b_addr <= buf_b_addr + b_read_count * DW / 8;
+                    buf_b_waddr_o <= buf_b_waddr_o + b_read_count * DW / 8;
                 end
                 WRITE_C: begin
                     c_write_count <= c_write_count + 1;
@@ -128,8 +129,8 @@ module DMA_ENGINE
                     a_read_count <= 0;
                     b_read_count <= 0;
                     c_write_count <= 0;
-                    buf_a_addr <= mat_a_addr_i;
-                    buf_b_addr <= mat_b_addr_i;
+                    buf_a_waddr_o <= mat_a_addr_i;
+                    buf_b_waddr_o <= mat_b_addr_i;
                     buf_c_addr <= mat_c_addr_i;
                 end
             endcase
@@ -148,8 +149,8 @@ module DMA_ENGINE
             mm_start_o <= 0;
             done_o <= 0;
 
-            buf_a_data <= 0;
-            buf_b_data <= 0;
+            buf_a_data_o <= 0;
+            buf_b_data_o <= 0;
 
             axi_aw_if.awaddr <= 0;
             axi_w_if.wdata <= 0;
@@ -163,11 +164,11 @@ module DMA_ENGINE
             case (state)
                 READ_A: begin
                     buf_a_wren_o <= 1;
-                    buf_a_data <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
+                    buf_a_data_o <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
                 end
                 READ_B: begin
                     buf_b_wren_o <= 1;
-                    buf_b_data <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
+                    buf_b_data_o <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
                 end
                 WAIT_MM: begin
                     mm_start_o <= 1;
@@ -183,13 +184,6 @@ module DMA_ENGINE
         end
         
     end
-
-    assign buf_a_waddr_o = buf_a_addr;
-    assign buf_b_waddr_o = buf_b_addr;
-
-    assign buf_a_wdata_o = buf_a_data;
-    assign buf_b_wdata_o = buf_b_data;
-
 endmodule
 
 
