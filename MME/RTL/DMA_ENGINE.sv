@@ -135,9 +135,9 @@ module DMA_ENGINE
             endcase
         end
         $display("state: %d, state_n: %d\n", state, state_n);
-        // $display("a_read_count: %d, b_read_count: %d, c_write_count: %d\n", a_read_count, b_read_count, c_write_count);
-        // $display("buf_a_addr: %d, buf_b_addr: %d, buf_c_addr: %d\n", buf_a_addr, buf_b_addr, buf_c_addr);
-        // $display("mat_a_addr_i: %d, mat_b_addr_i: %d, mat_c_addr_i: %d\n", mat_a_addr_i, mat_b_addr_i, mat_c_addr_i);
+        $display("a_read_count: %d, b_read_count: %d, c_write_count: %d\n", a_read_count, b_read_count, c_write_count);
+        $display("buf_a_addr: %d, buf_b_addr: %d, buf_c_addr: %d\n", buf_a_addr, buf_b_addr, buf_c_addr);
+        $display("mat_a_addr_i: %d, mat_b_addr_i: %d, mat_c_addr_i: %d\n", mat_a_addr_i, mat_b_addr_i, mat_c_addr_i);
     end
 
     // FSM output logic
@@ -148,8 +148,8 @@ module DMA_ENGINE
             mm_start_o <= 0;
             done_o <= 0;
 
-            buf_a_wdata_o <= 0;
-            buf_b_wdata_o <= 0;
+            buf_a_data <= 0;
+            buf_b_data <= 0;
 
             axi_aw_if.awaddr <= 0;
             axi_w_if.wdata <= 0;
@@ -163,11 +163,11 @@ module DMA_ENGINE
             case (state)
                 READ_A: begin
                     buf_a_wren_o <= 1;
-                    buf_a_wdata_o <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
+                    buf_a_data <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
                 end
                 READ_B: begin
                     buf_b_wren_o <= 1;
-                    buf_b_wdata_o <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
+                    buf_b_data <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
                 end
                 WAIT_MM: begin
                     mm_start_o <= 1;
@@ -186,6 +186,8 @@ module DMA_ENGINE
 
     assign buf_a_waddr_o = buf_a_addr;
     assign buf_b_waddr_o = buf_b_addr;
+    assign buf_a_wdata_o = buf_a_data;
+    assign buf_b_wdata_o = buf_b_data;
 
 endmodule
 
