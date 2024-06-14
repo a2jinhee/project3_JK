@@ -112,6 +112,8 @@ module DMA_ENGINE
         endcase
     end
 
+    reg [7:0] buf_a_start_idx, buf_a_end_idx;
+    reg [7:0] buf_b_start_idx, buf_b_end_idx;
     // Counters and addresses
     always @(posedge clk) begin
         if (!rst_n) begin
@@ -157,10 +159,20 @@ module DMA_ENGINE
                     // - input: rvalid, rid, rdata, rlast
                     axi_r_if.rready <= 1;
 
+                    // Calculate part select indices for buffer A
+                    buf_a_start_idx = 32 * count_a;
+                    buf_a_end_idx = 32 * (count_a + 1) - 1;
+
+                    // Calculate part select indices for buffer B
+                    buf_b_start_idx = 32 * count_b;
+                    buf_b_end_idx = 32 * (count_b + 1) - 1;
+
+
+
                     // buffer A - handshake && id
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
                         buf_a_addr <= 0;
-                        buf_a_data[32*(count_a+1)-1 : 32*count_a] <= axi_r_if.rdata;
+                        buf_a_data[buf_a_end_idx:buf_a_start_idx] <= axi_r_if.rdata;
                         count_a <= count_a + 1;
                     end
 
@@ -173,7 +185,7 @@ module DMA_ENGINE
                     // buffer B - handshake && id
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
                         buf_b_addr <= 0;
-                        buf_b_data[32*(count_b+1)-1 : 32*count_b] <= axi_r_if.rdata;
+                        buf_b_data[buf_b_end_idx:buf_b_start_idx] <= axi_r_if.rdata;
                         count_b <= count_b + 1;
                     end
 
