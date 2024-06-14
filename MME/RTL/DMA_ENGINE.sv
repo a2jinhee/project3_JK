@@ -83,13 +83,13 @@ module DMA_ENGINE
                     state_n = READ_A;
             end
             READ_A: begin
-                if (a_read_count == SA_WIDTH * mat_width_i - 1 && axi_aw_if.awready && axi_aw_if.awvalid)
+                if (a_read_count ==  mat_width_i - 1 && axi_aw_if.awready && axi_aw_if.awvalid)
                     // handshake with axi_if; 
                     // pass mat_b_addr_i + offset to axi_if to get mem_b data
                     state_n = READ_B;
             end
             READ_B: begin
-                if (b_read_count == SA_WIDTH * mat_width_i - 1 && axi_aw_if.awready && axi_aw_if.awvalid)
+                if (b_read_count == mat_width_i - 1 && axi_aw_if.awready && axi_aw_if.awvalid)
                     state_n = WAIT_MM;
             end
             WAIT_MM: begin
@@ -97,7 +97,7 @@ module DMA_ENGINE
                     state_n = WRITE_C;
             end
             WRITE_C: begin
-                if (c_write_count == SA_WIDTH * mat_width_i - 1)
+                if (c_write_count == mat_width_i - 1)
                     state_n = IDLE;
             end
         endcase
@@ -118,15 +118,25 @@ module DMA_ENGINE
         end else begin
             case (state)
                 READ_A: begin
+                    // axi command to read data from mat_a_addr_i + offset (burst for 128 bits = 16 bytes)
+                    axi_aw_if.arlen <= 16;
+                    axi_aw_if.arsize <= 4;
+                    axi_aw_if.arburst <= 1;
+
                     a_read_count <= a_read_count + 1;
-                    buf_a_addr <= buf_a_addr + a_read_count * DW / 8; // byte address
-                    axi_aw_if.awaddr <= mat_a_addr_i + a_read_count * DW / 8; // byte address
+
+                    axi_aw_if.awaddr <= mat_a_addr_i + a_read_count * 4 * (DW / 8); // byte address
                     axi_aw_if.awvalid <= 1;
                 end
                 READ_B: begin
+                    // axi command to read data from mat_a_addr_i + offset (burst for 128 bits = 16 bytes)
+                    axi_aw_if.arlen <= 16;
+                    axi_aw_if.arsize <= 4;
+                    axi_aw_if.arburst <= 1;
+
                     b_read_count <= b_read_count + 1;
-                    buf_b_addr <= buf_b_addr + b_read_count * DW / 8;
-                    axi_aw_if.awaddr <= mat_b_addr_i + b_read_count * DW / 8;
+
+                    axi_aw_if.awaddr <= mat_b_addr_i + b_read_count * 4 * (DW / 8); // byte address
                     axi_aw_if.awvalid <= 1;
                 end
                 WRITE_C: begin
@@ -147,7 +157,7 @@ module DMA_ENGINE
             endcase
         end
         $display("state: %d, state_n: %d\n", state, state_n);
-        // $display("a_read_count: %d, b_read_count: %d, c_write_count: %d\n", a_read_count, b_read_count, c_write_count);
+        $display("a_read_count: %d, b_read_count: %d, c_write_count: %d\n", a_read_count, b_read_count, c_write_count);
         // $display("buf_a_addr: %d, buf_b_addr: %d, buf_c_addr: %d\n", buf_a_addr, buf_b_addr, buf_c_addr);
         // $display("mat_a_addr_i: %d, mat_b_addr_i: %d, mat_c_addr_i: %d\n", mat_a_addr_i, mat_b_addr_i, mat_c_addr_i);
     end
