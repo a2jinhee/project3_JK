@@ -130,7 +130,7 @@ module DMA_ENGINE
                     axi_ar_if.arsize <= 2;
                     axi_ar_if.arburst <= 1;
 
-                    axi_ar_if.araddr <= mat_a_addr_i + a_read_count * 4 * (DW / 8); // byte address
+                    axi_ar_if.araddr <= mat_a_addr_i + a_read_count * 4 * (DW); // byte address
 
                     if (axi_r_if.rlast)
                         a_read_count <= a_read_count + 1;
@@ -144,7 +144,7 @@ module DMA_ENGINE
                     axi_ar_if.arsize <= 2;
                     axi_ar_if.arburst <= 1;
 
-                    axi_ar_if.araddr <= mat_b_addr_i + b_read_count * 4 * (DW / 8); // byte address
+                    axi_ar_if.araddr <= mat_b_addr_i + b_read_count * 4 * (DW); // byte address
 
                     if (axi_r_if.rlast)
                         b_read_count <= b_read_count + 1;
@@ -157,7 +157,7 @@ module DMA_ENGINE
                     axi_aw_if.awsize <= 2;
                     axi_aw_if.awburst <= 1;
 
-                    axi_aw_if.awaddr <= mat_c_addr_i + c_write_count * 4 * (DW / 8); // byte address
+                    axi_aw_if.awaddr <= mat_c_addr_i + c_write_count * 4 * (DW); // byte address
 
                     if (axi_w_if.wlast)
                         c_write_count <= c_write_count + 1;
