@@ -79,9 +79,7 @@ module DMA_ENGINE
         state_n = state;
         case (state)
             IDLE: begin
-                // if start and handshake with axi_if; 
-                // pass mat_a_addr_i + offset to axi_if to get mem_a data
-                if (start_i && axi_aw_if.awready && axi_aw_if.awvalid)
+                if (start_i)
                     state_n = READ_A;
             end
             READ_A: begin
@@ -119,12 +117,14 @@ module DMA_ENGINE
                 READ_A: begin
                     a_read_count <= a_read_count + 1;
                     buf_a_addr <= buf_a_addr + a_read_count * DW / 8; // byte address
-                    axi_aw_if.awaddr <= mat_a_addr_i + a_read_count * DW / 8; // byte address
+                    if (axi_aw_if.awready && axi_aw_if.awvalid)
+                        axi_aw_if.awaddr <= mat_a_addr_i + a_read_count * DW / 8; // byte address
                 end
                 READ_B: begin
                     b_read_count <= b_read_count + 1;
                     buf_b_addr <= buf_b_addr + b_read_count * DW / 8;
-                    axi_aw_if.awaddr <= mat_b_addr_i + b_read_count * DW / 8;
+                    if (axi_aw_if.awready && axi_aw_if.awvalid)
+                        axi_aw_if.awaddr <= mat_b_addr_i + b_read_count * DW / 8;
                 end
                 WRITE_C: begin
                     c_write_count <= c_write_count + 1;
@@ -156,10 +156,13 @@ module DMA_ENGINE
 
             buf_a_data <= 0;
             buf_b_data <= 0;
+            axi_r_if.valid <= 0;
 
             axi_aw_if.awaddr <= 0;
             axi_w_if.wdata <= 0;
             axi_w_if.wvalid <= 0;
+            axi_aw_if.awvalid <= 0;
+
 
         end else begin
             buf_a_wren_o <= 0;
@@ -170,10 +173,16 @@ module DMA_ENGINE
                 READ_A: begin
                     buf_a_wren_o <= 1;
                     buf_a_data <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
+
+                    // handshake with axi_if;
+                    axi_r_if.valid <= 1;
                 end
                 READ_B: begin
                     buf_b_wren_o <= 1;
                     buf_b_data <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
+
+                    // handshake with axi_if;
+                    axi_r_if.valid <= 1;
                 end
                 WAIT_MM: begin
                     mm_start_o <= 1;
@@ -181,7 +190,10 @@ module DMA_ENGINE
                 WRITE_C: begin
                     axi_aw_if.awaddr <= buf_c_addr;
                     axi_w_if.wdata <= accum_i[c_write_count / SA_WIDTH][c_write_count % SA_WIDTH];  // Assuming accum_i provides the computed data
+                    
+                    axi_aw_if.awvalid <= 1;
                     axi_w_if.wvalid <= 1;
+
                     if (c_write_count == SA_WIDTH - 1)
                         done_o <= 1;
                 end
