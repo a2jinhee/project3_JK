@@ -113,8 +113,8 @@ module DMA_ENGINE
             buf_b_addr <= 0;
             buf_c_addr <= 0;
 
-            axi_ar_if.awaddr <= 0;
-            axi_ar_if.awvalid <= 0;
+            axi_ar_if.araddr <= 0;
+            axi_ar_if.arvalid <= 0;
         end else begin
             case (state)
                 READ_A: begin
