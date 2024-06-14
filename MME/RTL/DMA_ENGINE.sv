@@ -126,11 +126,11 @@ module DMA_ENGINE
             case (state)
                 READ_A: begin
                     // axi command to read data from mat_a_addr_i + offset (burst for 128 bits = 16 bytes)
-                    axi_ar_if.arlen <= 4;
-                    axi_ar_if.arsize <= 2;
+                    axi_ar_if.arlen <= 16;
+                    axi_ar_if.arsize <= 4;
                     axi_ar_if.arburst <= 1;
 
-                    axi_ar_if.araddr <= mat_a_addr_i + a_read_count * 4 * (DW); // byte address
+                    axi_ar_if.araddr <= mat_a_addr_i + a_read_count * 16 * (DW/4); // byte address
 
                     if (axi_r_if.rlast)
                         a_read_count <= a_read_count + 1;
@@ -140,11 +140,11 @@ module DMA_ENGINE
                 end
                 READ_B: begin
                     // axi command to read data from mat_a_addr_i + offset (burst for 128 bits = 16 bytes)
-                    axi_ar_if.arlen <= 4;
-                    axi_ar_if.arsize <= 2;
+                    axi_ar_if.arlen <= 16;
+                    axi_ar_if.arsize <= 4;
                     axi_ar_if.arburst <= 1;
 
-                    axi_ar_if.araddr <= mat_b_addr_i + b_read_count * 4 * (DW); // byte address
+                    axi_ar_if.araddr <= mat_b_addr_i + b_read_count * 16 * (DW/4); // byte address
 
                     if (axi_r_if.rlast)
                         b_read_count <= b_read_count + 1;
@@ -153,11 +153,11 @@ module DMA_ENGINE
                         buf_b_wren_o <= 1;
                 end
                 WRITE_C: begin
-                    axi_aw_if.awlen <= 4;
-                    axi_aw_if.awsize <= 2;
+                    axi_aw_if.awlen <= 16;
+                    axi_aw_if.awsize <= 4;
                     axi_aw_if.awburst <= 1;
 
-                    axi_aw_if.awaddr <= mat_c_addr_i + c_write_count * 4 * (DW); // byte address
+                    axi_aw_if.awaddr <= mat_c_addr_i + c_write_count * 16 * (DW/4); // byte address
 
                     if (axi_w_if.wlast)
                         c_write_count <= c_write_count + 1;
@@ -205,24 +205,28 @@ module DMA_ENGINE
             done_o <= 0;
             case (state)
                 READ_A: begin
+                    buf_a_wren_o <= 0; 
                     axi_r_if.rready <= 1;
 
                     if (axi_r_if.rvalid)
                         buf_a_addr <= buf_a_addr + a_burst_count * (DW / 8);
                         buf_a_data <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
                         a_burst_count <= a_burst_count + 1;
+
                         if (a_burst_count == 3)
                             a_burst_count <= 0;
                             buf_a_wren_o <= 1;
                     
                 end
                 READ_B: begin
+                    buf_b_wren_o <= 0;
                     axi_r_if.rready <= 1;
 
                     if (axi_r_if.rvalid)
                         buf_b_addr <= buf_b_addr + b_burst_count * (DW / 8);
                         buf_b_data <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
                         b_burst_count <= b_burst_count + 1;
+
                         if (b_burst_count == 3)
                             b_burst_count <= 0;
                             buf_b_wren_o <= 1;
