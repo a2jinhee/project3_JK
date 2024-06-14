@@ -240,6 +240,10 @@ module DMA_ENGINE
                         c_burst_count <= c_burst_count + 1;
                         axi_w_if.wvalid <= 1;
 
+                        if (c_burst_count == 3)
+                            c_burst_count <= 0;
+                            axi_w_if.wlast <= 1;
+
                     if (c_write_count == 3)
                         done_o <= 1;
                 end
