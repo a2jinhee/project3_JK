@@ -125,10 +125,11 @@ module DMA_ENGINE
                         axi_aw_if.awvalid <= 1;
                 end
                 READ_B: begin
-                    b_read_count <= b_read_count + 1;
-                    buf_b_addr <= buf_b_addr + b_read_count * DW / 8;
-                    axi_aw_if.awaddr <= mat_b_addr_i + b_read_count * DW / 8;
-                    axi_aw_if.awvalid <= 1;
+                    if (axi_aw_if.awready)
+                        b_read_count <= b_read_count + 1;
+                        buf_b_addr <= buf_b_addr + b_read_count * DW / 8;
+                        axi_aw_if.awaddr <= mat_b_addr_i + b_read_count * DW / 8;
+                        axi_aw_if.awvalid <= 1;
                 end
                 WRITE_C: begin
                     c_write_count <= c_write_count + 1;
