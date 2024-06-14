@@ -84,18 +84,15 @@ module DMA_ENGINE
                     state_n = READ_A;
             end
             READ_A: begin
-                if (a_read_count==mat_width_i - 1) begin
+                if (a_read_count== SA_WIDTH*mat_width_i - 1)
                     // handshake with axi_if; 
                     // pass mat_b_addr_i + offset to axi_if to get mem_b data
                     state_n = READ_B;
-                    $display("### READ A");
-                end
                 else
                     state_n = READ_A;
             end
             READ_B: begin
-                $display("b_read_count: %d, mat_width_i: %d\n", b_read_count, mat_width_i);
-                if (b_read_count == mat_width_i - 1)
+                if (b_read_count == SA_WIDTH*mat_width_i - 1)
                     state_n = WAIT_MM;
                 else
                     state_n = READ_B;
