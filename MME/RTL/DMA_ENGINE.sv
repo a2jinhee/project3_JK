@@ -125,9 +125,8 @@ module DMA_ENGINE
 
                     if (axi_r_if.rlast)
                         a_read_count <= a_read_count + 1;
-
-                    axi_ar_if.araddr <= mat_a_addr_i + a_read_count * 4 * (DW / 8); // byte address
-                    axi_ar_if.arvalid <= 1;
+                        axi_ar_if.araddr <= mat_a_addr_i + a_read_count * 4 * (DW / 8); // byte address
+                        axi_ar_if.arvalid <= 1;
                 end
                 READ_B: begin
                     // axi command to read data from mat_a_addr_i + offset (burst for 128 bits = 16 bytes)
@@ -149,7 +148,7 @@ module DMA_ENGINE
                     if (axi_w_if.wlast)
                         c_write_count <= c_write_count + 1;
 
-                    axi_aw_if.awaddr <= mat_b_addr_i + b_read_count * 4 * (DW / 8); // byte address
+                    axi_aw_if.awaddr <= mat_c_addr_i + c_read_count * 4 * (DW / 8); // byte address
                     axi_aw_if.awvalid <= 1;
                 end
             endcase
