@@ -142,18 +142,16 @@ module DMA_ENGINE
 
                     if (axi_r_if.rlast)
                         b_read_count <= b_read_count + 1;
-
-                    axi_ar_if.araddr <= mat_b_addr_i + b_read_count * 4 * (DW / 8); // byte address
-                    axi_ar_if.arvalid <= 1;
+                        axi_ar_if.araddr <= mat_b_addr_i + b_read_count * 4 * (DW / 8); // byte address
+                        axi_ar_if.arvalid <= 1;
                 end
                 WRITE_C: begin
-                    axi_aw_if.awlen <= 4;
-                    axi_aw_if.awsize <= 2;
-                    axi_aw_if.awburst <= 1;
+                    // axi_aw_if.awlen <= 4;
+                    // axi_aw_if.awsize <= 2;
+                    // axi_aw_if.awburst <= 1;
 
-                    if (axi_w_if.wlast)
-                        c_write_count <= c_write_count + 1;
-
+                    // if (axi_w_if.wlast)
+                    c_write_count <= c_write_count + 1;
                     axi_aw_if.awaddr <= mat_c_addr_i + c_write_count * 4 * (DW / 8); // byte address
                     axi_aw_if.awvalid <= 1;
                 end
