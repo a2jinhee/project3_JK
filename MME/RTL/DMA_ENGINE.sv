@@ -142,11 +142,11 @@ module DMA_ENGINE
                     axi_ar_if.arvalid <= 1;
                 end
                 WRITE_C: begin
-                    axi_aw_if.arlen <= 16;
-                    axi_aw_if.arsize <= 4;
-                    axi_aw_if.arburst <= 1;
+                    axi_aw_if.awlen <= 16;
+                    axi_aw_if.awsize <= 4;
+                    axi_aw_if.awburst <= 1;
 
-                    if (axi_w_if.rlast)
+                    if (axi_w_if.wlast)
                         c_write_count <= c_write_count + 1;
 
                     axi_aw_if.awaddr <= mat_b_addr_i + b_read_count * 4 * (DW / 8); // byte address
