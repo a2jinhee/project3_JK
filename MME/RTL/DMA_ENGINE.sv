@@ -68,6 +68,7 @@ module DMA_ENGINE
     reg [7:0] a_read_count, b_read_count, c_write_count;
     reg [BUF_AW-1:0] buf_a_addr, buf_b_addr, buf_c_addr;
     reg [BUF_DW-1:0] buf_a_data, buf_b_data;
+    reg [1:0] a_burst_count, b_burst_count;
     
     always_ff @(posedge clk)
         if (!rst_n)
@@ -134,6 +135,10 @@ module DMA_ENGINE
                     if (axi_r_if.rlast)
                         a_read_count <= a_read_count + 1;
                         axi_ar_if.arvalid <= 1;
+
+                        buf_a_addr_o <= 0;
+                        buf_a_data_o <= buf_a_data;
+                        buf_a_wren_o <= 1;
                 end
                 READ_B: begin
                     // axi command to read data from mat_a_addr_i + offset (burst for 128 bits = 16 bytes)
@@ -146,16 +151,21 @@ module DMA_ENGINE
                     if (axi_r_if.rlast)
                         b_read_count <= b_read_count + 1;
                         axi_ar_if.arvalid <= 1;
+
+                        buf_b_addr_o <= 0;
+                        buf_b_data_o <= buf_b_data;
+                        buf_b_wren_o <= 1;
                 end
                 WRITE_C: begin
-                    // axi_aw_if.awlen <= 4;
-                    // axi_aw_if.awsize <= 2;
-                    // axi_aw_if.awburst <= 1;
+                    axi_aw_if.awlen <= 4;
+                    axi_aw_if.awsize <= 2;
+                    axi_aw_if.awburst <= 1;
 
-                    // if (axi_w_if.wlast)
-                    c_write_count <= c_write_count + 1;
                     axi_aw_if.awaddr <= mat_c_addr_i + c_write_count * 4 * (DW / 8); // byte address
-                    axi_aw_if.awvalid <= 1;
+
+                    if (axi_w_if.wlast)
+                        c_write_count <= c_write_count + 1;
+                        axi_aw_if.awvalid <= 1;
                 end
             endcase
         end
@@ -176,12 +186,21 @@ module DMA_ENGINE
 
             buf_a_data <= 0;
             buf_b_data <= 0;
+
+            buf_a_addr <= 0; 
+            buf_b_addr <= 0;
+
+
             axi_r_if.rready <= 0;
 
             axi_aw_if.awaddr <= 0;
             axi_w_if.wdata <= 0;
             axi_w_if.wvalid <= 0;
             axi_aw_if.awvalid <= 0;
+
+            a_burst_count <= 0;
+            b_burst_count <= 0;
+
 
         end else begin
             buf_a_wren_o <= 0;
@@ -190,19 +209,27 @@ module DMA_ENGINE
             done_o <= 0;
             case (state)
                 READ_A: begin
-                    buf_a_wren_o <= 1;
                     axi_r_if.rready <= 1;
 
                     if (axi_r_if.rvalid)
+                        buf_a_addr <= buf_a_addr + a_burst_count * (DW / 8);
                         buf_a_data <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
-
+                        a_burst_count <= a_burst_count + 1;
+                        if (a_burst_count == 3)
+                            a_burst_count <= 0;
+                    
                 end
                 READ_B: begin
                     buf_b_wren_o <= 1;
                     axi_r_if.rready <= 1;
 
                     if (axi_r_if.rvalid)
+                        buf_b_addr <= buf_b_addr + b_burst_count * (DW / 8);
                         buf_b_data <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
+
+                        b_burst_count <= b_burst_count + 1;
+                        if (b_burst_count == 3)
+                            b_burst_count <= 0;
 
                 end
                 WAIT_MM: begin
@@ -210,7 +237,7 @@ module DMA_ENGINE
                 end
                 WRITE_C: begin
 
-                    axi_w_if.wdata <= accum_i[c_write_count / SA_WIDTH][c_write_count % SA_WIDTH];  // Assuming accum_i provides the computed data
+                    axi_w_if.wdata <= accum_i[c_write_count];  // Assuming accum_i provides the computed data
 
                     axi_w_if.wvalid <= 1;
 
@@ -222,10 +249,6 @@ module DMA_ENGINE
         $display("buf_a_data: %d, buf_b_data: %d\n", buf_a_data, buf_b_data);
         $display("axi_r_if.rdata: \n", axi_r_if.rdata);
     end
-
-
-    assign buf_a_wdata_o = buf_a_data;
-    assign buf_b_wdata_o = buf_b_data;
 
 endmodule
 
