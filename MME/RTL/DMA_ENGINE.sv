@@ -79,11 +79,15 @@ module DMA_ENGINE
         state_n = state;
         case (state)
             IDLE: begin
-                if (start_i)
+                // if start and handshake with axi_if; 
+                // pass mat_a_addr_i + offset to axi_if to get mem_a data
+                if (start_i && axi_aw_if.awready && axi_aw_if.awvalid)
                     state_n = READ_A;
             end
             READ_A: begin
-                if (a_read_count == SA_WIDTH - 1)
+                if (a_read_count == SA_WIDTH - 1 && axi_aw_if.awready && axi_aw_if.awvalid)
+                    // handshake with axi_if; 
+                    // pass mat_b_addr_i + offset to axi_if to get mem_b data
                     state_n = READ_B;
             end
             READ_B: begin
@@ -91,7 +95,7 @@ module DMA_ENGINE
                     state_n = WAIT_MM;
             end
             WAIT_MM: begin
-                if (mm_done_i)
+                if (mm_done_i && axi_aw_if.awready && axi_aw_if.awvalid)
                     state_n = WRITE_C;
             end
             WRITE_C: begin
@@ -115,10 +119,12 @@ module DMA_ENGINE
                 READ_A: begin
                     a_read_count <= a_read_count + 1;
                     buf_a_addr <= buf_a_addr + a_read_count * DW / 8; // byte address
+                    axi_aw_if.awaddr <= mat_a_addr_i + a_read_count * DW / 8; // byte address
                 end
                 READ_B: begin
                     b_read_count <= b_read_count + 1;
                     buf_b_addr <= buf_b_addr + b_read_count * DW / 8;
+                    axi_aw_if.awaddr <= mat_b_addr_i + b_read_count * DW / 8;
                 end
                 WRITE_C: begin
                     c_write_count <= c_write_count + 1;
@@ -128,9 +134,9 @@ module DMA_ENGINE
                     a_read_count <= 0;
                     b_read_count <= 0;
                     c_write_count <= 0;
-                    buf_a_addr <= mat_a_addr_i;
-                    buf_b_addr <= mat_b_addr_i;
-                    buf_c_addr <= mat_c_addr_i;
+                    buf_a_addr <= 0;
+                    buf_b_addr <= 0;
+                    buf_c_addr <= 0;
                 end
             endcase
         end
