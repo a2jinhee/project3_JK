@@ -83,7 +83,7 @@ module DMA_ENGINE
         case (state)
             IDLE: begin
                 if (start_i)
-                    state_n = READ_A;
+                    state_n = ADDR_A;
             end
             ADDR_A: begin
                 if (axi.ar_if.arready)
@@ -118,7 +118,6 @@ module DMA_ENGINE
 
             buf_a_addr <= 0;
             buf_b_addr <= 0;
-            buf_c_addr <= 0;
             count_a <= 0;
             count_b <= 0;
             count_c <= 0;
