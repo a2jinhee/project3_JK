@@ -92,6 +92,7 @@ module DMA_ENGINE
                     state_n = READ_A;
             end
             READ_B: begin
+                $display("b_read_count: %d, mat_width_i: %d\n", b_read_count, mat_width_i);
                 if (b_read_count == mat_width_i - 1)
                     state_n = WAIT_MM;
                 else
@@ -136,7 +137,6 @@ module DMA_ENGINE
                         a_read_count <= a_read_count + 1;
                         axi_ar_if.arvalid <= 1;
 
-                        buf_a_wren_o <= 1;
                 end
                 READ_B: begin
                     // axi command to read data from mat_a_addr_i + offset (burst for 128 bits = 16 bytes)
@@ -150,7 +150,6 @@ module DMA_ENGINE
                         b_read_count <= b_read_count + 1;
                         axi_ar_if.arvalid <= 1;
 
-                        buf_b_wren_o <= 1;
                 end
                 WRITE_C: begin
                     axi_aw_if.awlen <= 16;
@@ -167,7 +166,7 @@ module DMA_ENGINE
         $display("state: %d, state_n: %d\n", state, state_n);
         $display("a_read_count: %d, b_read_count: %d, c_write_count: %d\n", a_read_count, b_read_count, c_write_count);
         $display("axi_ar_if.araddr: %d\n", axi_ar_if.araddr);
-        $display("mat_width_i: %d\n", mat_width_i);
+        
         // $display("buf_a_addr: %d, buf_b_addr: %d, buf_c_addr: %d\n", buf_a_addr, buf_b_addr, buf_c_addr);
         // $display("mat_a_addr_i: %d, mat_b_addr_i: %d, mat_c_addr_i: %d\n", mat_a_addr_i, mat_b_addr_i, mat_c_addr_i);
     end
