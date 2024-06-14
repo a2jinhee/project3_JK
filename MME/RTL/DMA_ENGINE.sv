@@ -137,7 +137,7 @@ module DMA_ENGINE
                         axi_ar_if.arvalid <= 1;
 
                         buf_a_waddr_o <= 0;
-                        buf_a_data_o <= buf_a_data;
+                        buf_a_wdata_o <= buf_a_data;
                         buf_a_wren_o <= 1;
                 end
                 READ_B: begin
@@ -153,7 +153,7 @@ module DMA_ENGINE
                         axi_ar_if.arvalid <= 1;
 
                         buf_b_waddr_o <= 0;
-                        buf_b_data_o <= buf_b_data;
+                        buf_b_wdata_o <= buf_b_data;
                         buf_b_wren_o <= 1;
                 end
                 WRITE_C: begin
