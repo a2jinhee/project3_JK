@@ -93,7 +93,7 @@ module DMA_ENGINE
                     state_n = WAIT_MM;
             end
             WAIT_MM: begin
-                if (mm_done_i && axi_aw_if.awready && axi_aw_if.awvalid)
+                if (mm_done_i)
                     state_n = WRITE_C;
             end
             WRITE_C: begin
