@@ -126,47 +126,41 @@ module DMA_ENGINE
             case (state)
                 READ_A: begin
                     // axi command to read data from mat_a_addr_i + offset (burst for 128 bits = 16 bytes)
-                    if (a_read_count == 0) begin
-                        axi_ar_if.arlen <= 4;
-                        axi_ar_if.arsize <= 2;
-                        axi_ar_if.arburst <= 1;
+                    axi_ar_if.arlen <= 4;
+                    axi_ar_if.arsize <= 2;
+                    axi_ar_if.arburst <= 1;
 
-                        axi_ar_if.araddr <= mat_a_addr_i + a_read_count * 4 * (DW / 8); // byte address
+                    axi_ar_if.araddr <= mat_a_addr_i + a_read_count * 4 * (DW / 8); // byte address
 
-                        if (axi_r_if.rlast)
-                            a_read_count <= a_read_count + 1;
-                            axi_ar_if.arvalid <= 1;
+                    if (axi_r_if.rlast)
+                        a_read_count <= a_read_count + 1;
+                        axi_ar_if.arvalid <= 1;
 
-                            buf_a_wren_o <= 1;
-                    end
+                        buf_a_wren_o <= 1;
                 end
                 READ_B: begin
                     // axi command to read data from mat_a_addr_i + offset (burst for 128 bits = 16 bytes)
-                    if (b_read_count == 0) begin
-                        axi_ar_if.arlen <= 4;
-                        axi_ar_if.arsize <= 2;
-                        axi_ar_if.arburst <= 1;
+                    axi_ar_if.arlen <= 4;
+                    axi_ar_if.arsize <= 2;
+                    axi_ar_if.arburst <= 1;
 
-                        axi_ar_if.araddr <= mat_b_addr_i + b_read_count * 4 * (DW / 8); // byte address
+                    axi_ar_if.araddr <= mat_b_addr_i + b_read_count * 4 * (DW / 8); // byte address
 
-                        if (axi_r_if.rlast)
-                            b_read_count <= b_read_count + 1;
-                            axi_ar_if.arvalid <= 1;
+                    if (axi_r_if.rlast)
+                        b_read_count <= b_read_count + 1;
+                        axi_ar_if.arvalid <= 1;
 
-                            buf_b_wren_o <= 1;
-                    end
+                        buf_b_wren_o <= 1;
                 end
                 WRITE_C: begin
-                    if (c_write_count == 0) begin
-                        axi_aw_if.awlen <= 4;
-                        axi_aw_if.awsize <= 2;
-                        axi_aw_if.awburst <= 1;
+                    axi_aw_if.awlen <= 4;
+                    axi_aw_if.awsize <= 2;
+                    axi_aw_if.awburst <= 1;
 
-                        axi_aw_if.awaddr <= mat_c_addr_i + c_write_count * 4 * (DW / 8); // byte address
+                    axi_aw_if.awaddr <= mat_c_addr_i + c_write_count * 4 * (DW / 8); // byte address
 
-                        if (axi_w_if.wlast)
-                            c_write_count <= c_write_count + 1;
-                    end
+                    if (axi_w_if.wlast)
+                        c_write_count <= c_write_count + 1;
                 end
             endcase
         end
