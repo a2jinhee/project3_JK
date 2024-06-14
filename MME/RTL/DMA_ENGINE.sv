@@ -191,14 +191,16 @@ module DMA_ENGINE
                     buf_a_wren_o <= 1;
                     axi_r_if.rready <= 1;
 
-                    buf_a_data <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
+                    if (axi_r_if.rvalid)
+                        buf_a_data <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
 
                 end
                 READ_B: begin
                     buf_b_wren_o <= 1;
                     axi_r_if.rready <= 1;
 
-                    buf_b_data <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
+                    if (axi_r_if.rvalid)
+                        buf_b_data <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
 
                 end
                 WAIT_MM: begin
