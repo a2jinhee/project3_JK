@@ -156,7 +156,7 @@ module DMA_ENGINE
 
             buf_a_data <= 0;
             buf_b_data <= 0;
-            axi_r_if.rvalid <= 0;
+            axi_r_if.rready <= 0;
 
             axi_aw_if.awaddr <= 0;
             axi_w_if.wdata <= 0;
@@ -175,14 +175,14 @@ module DMA_ENGINE
                     buf_a_data <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
 
                     // handshake with axi_if;
-                    axi_r_if.rvalid <= 1;
+                    axi_r_if.rready <= 1;
                 end
                 READ_B: begin
                     buf_b_wren_o <= 1;
                     buf_b_data <= axi_r_if.rdata;  // Assuming axi_r_if provides the read data
 
                     // handshake with axi_if;
-                    axi_r_if.rvalid <= 1;
+                    axi_r_if.rready <= 1;
                 end
                 WAIT_MM: begin
                     mm_start_o <= 1;
