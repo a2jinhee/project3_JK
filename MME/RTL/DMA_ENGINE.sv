@@ -136,7 +136,6 @@ module DMA_ENGINE
                         a_read_count <= a_read_count + 1;
                         axi_ar_if.arvalid <= 1;
 
-                        buf_a_wdata_o <= buf_a_data;
                         buf_a_wren_o <= 1;
                 end
                 READ_B: begin
@@ -151,7 +150,6 @@ module DMA_ENGINE
                         b_read_count <= b_read_count + 1;
                         axi_ar_if.arvalid <= 1;
 
-                        buf_b_wdata_o <= buf_b_data;
                         buf_b_wren_o <= 1;
                 end
                 WRITE_C: begin
@@ -215,6 +213,7 @@ module DMA_ENGINE
                         a_burst_count <= a_burst_count + 1;
                         if (a_burst_count == 3)
                             a_burst_count <= 0;
+                            buf_a_wren_o <= 1;
                     
                 end
                 READ_B: begin
@@ -228,6 +227,7 @@ module DMA_ENGINE
                         b_burst_count <= b_burst_count + 1;
                         if (b_burst_count == 3)
                             b_burst_count <= 0;
+                            buf_b_wren_o <= 1;
 
                 end
                 WAIT_MM: begin
@@ -247,6 +247,12 @@ module DMA_ENGINE
         $display("buf_a_data: %d, buf_b_data: %d\n", buf_a_data, buf_b_data);
         $display("axi_r_if.rdata: \n", axi_r_if.rdata);
     end
+
+    assign buf_a_waddr_o = buf_a_addr;
+    assign buf_b_waddr_o = buf_b_addr;
+
+    assign buf_a_wdata_o = buf_a_data;
+    assign buf_b_wdata_o = buf_b_data;
 
 endmodule
 
