@@ -99,6 +99,8 @@ module DMA_ENGINE
             WAIT_MM: begin
                 if (mm_done_i)
                     state_n = WRITE_C;
+                else
+                    state_n = WAIT_MM;
             end
             WRITE_C: begin
                 if (c_write_count == 3)
@@ -123,8 +125,8 @@ module DMA_ENGINE
             case (state)
                 READ_A: begin
                     // axi command to read data from mat_a_addr_i + offset (burst for 128 bits = 16 bytes)
-                    axi_ar_if.arlen <= 16;
-                    axi_ar_if.arsize <= 4;
+                    axi_ar_if.arlen <= 4;
+                    axi_ar_if.arsize <= 2;
                     axi_ar_if.arburst <= 1;
 
                     if (axi_r_if.rlast)
@@ -134,8 +136,8 @@ module DMA_ENGINE
                 end
                 READ_B: begin
                     // axi command to read data from mat_a_addr_i + offset (burst for 128 bits = 16 bytes)
-                    axi_ar_if.arlen <= 16;
-                    axi_ar_if.arsize <= 4;
+                    axi_ar_if.arlen <= 4;
+                    axi_ar_if.arsize <= 2;
                     axi_ar_if.arburst <= 1;
 
                     if (axi_r_if.rlast)
@@ -145,8 +147,8 @@ module DMA_ENGINE
                     axi_ar_if.arvalid <= 1;
                 end
                 WRITE_C: begin
-                    axi_aw_if.awlen <= 16;
-                    axi_aw_if.awsize <= 4;
+                    axi_aw_if.awlen <= 4;
+                    axi_aw_if.awsize <= 2;
                     axi_aw_if.awburst <= 1;
 
                     if (axi_w_if.wlast)
