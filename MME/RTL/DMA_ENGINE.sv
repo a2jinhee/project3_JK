@@ -216,7 +216,7 @@ module DMA_ENGINE
             endcase
         end
         // $display("buf_a_data: %d, buf_b_data: %d\n", buf_a_data, buf_b_data);
-        // $display("axi_r_if.rdata: \n", axi_r_if.rdata);
+        $display("axi_r_if.rdata: \n", axi_r_if.rdata);
     end
 
 
