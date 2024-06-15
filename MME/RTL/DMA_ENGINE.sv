@@ -62,7 +62,7 @@ module DMA_ENGINE
                 WAIT_MM     = 3'b100,
                 ADDR_C      = 3'b101,
                 WRITE_C     = 3'b110,
-                DONE        = 3'b111
+                DONE        = 3'b111;
 
     reg [2:0] state, state_n;
     reg [BUF_DW-1:0] buf_a_data, buf_b_data;
