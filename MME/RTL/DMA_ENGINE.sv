@@ -113,7 +113,12 @@ module DMA_ENGINE
                 axi_ar_if.arid = 1;
                 axi_ar_if.araddr = mat_b_addr_i; 
 
-                if (!axi_ar_if.arready)
+                if (axi_ar_if.arready)
+                    axi_ar_if.arvalid = 0; 
+                else
+                    state_n = ADDR_B;
+
+                if (!axi_ar_if.arvalid && axi_ar_if.arready)
                     state_n = LOAD;
             end
             LOAD: begin
