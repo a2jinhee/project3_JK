@@ -195,6 +195,7 @@ module DMA_ENGINE
         buf_a_wren_o <= 0;
         buf_b_wren_o <= 0;
         mm_start_o <= 0;
+        done_o <= 0; 
 
         if (!rst_n) begin
 
@@ -269,9 +270,10 @@ module DMA_ENGINE
                     end
 
                     if (count_c == 15) begin
+                        done_o <= 1;
                         count_c <= 0; 
                         burst_a <= 0; 
-                        burst_b <= 0; 
+                        burst_b <= 0;
                     end
                 end
             endcase
@@ -299,8 +301,6 @@ module DMA_ENGINE
 
     assign buf_b_waddr_o = buf_b_addr;
     assign buf_b_wdata_o = buf_b_data;
-
-    assign done_o = (axi_b_if.bready && axi_b_if.bvalid); 
 
 
     
