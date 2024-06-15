@@ -163,6 +163,9 @@ module DMA_ENGINE
                 // - output: wvalid, wid, wdata, wlast
                 // - input: wready
                 axi_w_if.wvalid = 1;
+                axi_w_if.wid = 0;
+                axi_w_if.wstrb = 'hf;
+
                 if (axi_w_if.wlast)
                     state_n = DONE;
             end
