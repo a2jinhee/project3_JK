@@ -163,9 +163,9 @@ module DMA_ENGINE
                 // - output: wvalid, wid, wdata, wlast
                 // - input: wready
                 axi_w_if.wvalid = 1;
+                axi_b_if.bready = 1;
                 axi_w_if.wid = 0;
                 axi_w_if.wstrb = 'hf;
-                axi_b_if.bready = 1;
 
                 if (axi_w_if.wlast)
                     state_n = DONE;
@@ -174,6 +174,7 @@ module DMA_ENGINE
                 // B CHANNEL
                 // - output: bready
                 // - input: bvalid, bid, bresp
+                
 
                 if (axi_b_if.bvalid)
                     state_n = IDLE;
