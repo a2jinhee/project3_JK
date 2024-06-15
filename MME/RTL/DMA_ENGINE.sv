@@ -83,8 +83,6 @@ module DMA_ENGINE
             IDLE: begin
                 if (start_i)
                     state_n = ADDR_A;
-                    burst_a = 0; 
-                    burst_b = 0; 
             end
             ADDR_A: begin
                 // AR CHANNEL
@@ -95,11 +93,10 @@ module DMA_ENGINE
                 axi_ar_if.arsize = 4;
                 axi_ar_if.arburst = 1;
                 axi_ar_if.arid = 0; 
-                axi_ar_if.araddr = mat_a_addr_i + (burst_a * 'd64); 
+                axi_ar_if.araddr = mat_a_addr_i + (burst_a * 64); 
 
                 if (axi_ar_if.arready) begin
                     axi_ar_if.arvalid = 0; 
-                    burst_a = burst_a + 1;
                 end else
                     state_n = ADDR_A;
 
@@ -211,8 +208,16 @@ module DMA_ENGINE
             count_c <= 0;
             mm_start_o <= 0;
 
+            burst_a <= 0;
+
         end else begin
             case (state)
+
+                A_ADDR: begin
+                    if (axi_ar_if.arready) begin
+                        burst_a <= burst_a + 1;
+                    end
+                end
 
                 LOAD: begin                    
                     // buffer A - handshake && id
