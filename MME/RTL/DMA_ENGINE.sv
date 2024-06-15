@@ -143,8 +143,14 @@ module DMA_ENGINE
                 axi_aw_if.awburst = 1;
                 axi_aw_if.awaddr = mat_c_addr_i; 
 
-                if (!axi_ar_if.arvalid)
+                if (axi_aw_if.awready)
+                    axi_aw_if.awvalid = 0; 
+                else
+                    state_n = ADDR_C;
+
+                if (!axi_aw_if.awvalid && axi_aw_if.awready)
                     state_n = WRITE_C;
+
             end
             WRITE_C: begin
                 // W CHANNEL
