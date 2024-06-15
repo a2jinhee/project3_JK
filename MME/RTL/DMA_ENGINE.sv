@@ -65,15 +65,26 @@ module DMA_ENGINE
 
     reg [2:0] state, state_n;
     reg [BUF_DW-1:0] buf_a_data, buf_b_data;
+    reg [BUF_DW-1:0] buf_a_data_n, buf_b_data_n;
     reg [BUF_AW-1:0] buf_a_addr, buf_b_addr;
+    reg [BUF_AW-1:0] buf_a_addr_n, buf_b_addr_n;
     reg [1:0] count_a, count_b, count_c; 
 
 
     always_ff @(posedge clk)
         if (!rst_n)
             state <= IDLE;
+            buf_a_data <= 0;
+            buf_b_data <= 0;
+            buf_a_addr <= 0;
+            buf_b_addr <= 0;
         else
             state <= state_n;
+            buf_a_data_n <= buf_a_data;
+            buf_b_data_n <= buf_b_data;
+            buf_a_addr_n <= buf_a_addr;
+            buf_b_addr_n <= buf_b_addr;
+
         
     always_comb begin 
         state_n = state;
@@ -167,6 +178,8 @@ module DMA_ENGINE
 
             buf_a_addr <= 0;
             buf_b_addr <= 0;
+            buf_a_data <= 0;
+            buf_b_data <= 0;
             count_a <= 0;
             count_b <= 0;
             count_c <= 0;
@@ -177,12 +190,12 @@ module DMA_ENGINE
                 LOAD: begin                    
                     // buffer A - handshake && id
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
-                        buf_a_addr <= buf_a_addr;
+                        buf_a_addr_n <= buf_a_addr;
                         case (count_a)
-                            0: buf_a_data[31 :0] <= axi_r_if.rdata;
-                            1: buf_a_data[63 : 32] <= axi_r_if.rdata;
-                            2: buf_a_data[95 : 64] <= axi_r_if.rdata;
-                            3: buf_a_data[127 : 96] <= axi_r_if.rdata;
+                            0: buf_a_data_n[31 :0] <= axi_r_if.rdata;
+                            1: buf_a_data_n[63 : 32] <= axi_r_if.rdata;
+                            2: buf_a_data_n[95 : 64] <= axi_r_if.rdata;
+                            3: buf_a_data_n[127 : 96] <= axi_r_if.rdata;
                         endcase
                         count_a <= count_a + 1;
                     end
@@ -190,7 +203,7 @@ module DMA_ENGINE
                     if (count_a == 4) begin
                         buf_a_wren_o <= 1;
                         count_a <= 0;
-                        buf_a_addr <= buf_a_addr + 4;
+                        buf_a_addr_n <= buf_a_addr + 4;
                     end
                     
                     // buffer B - handshake && id
@@ -232,11 +245,11 @@ module DMA_ENGINE
 
     end
 
-    assign buf_a_waddr_o = buf_a_addr;
-    assign buf_a_wdata_o = buf_a_data;
+    assign buf_a_waddr_o = buf_a_addr_n;
+    assign buf_a_wdata_o = buf_a_data_n;
 
-    assign buf_b_waddr_o = buf_b_addr;
-    assign buf_b_wdata_o = buf_b_data;
+    assign buf_b_waddr_o = buf_b_addr_n;
+    assign buf_b_wdata_o = buf_b_data_n;
 
 
     
