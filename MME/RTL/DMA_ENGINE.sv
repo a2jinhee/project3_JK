@@ -161,7 +161,6 @@ module DMA_ENGINE
                 // - output: wvalid, wid, wdata, wlast
                 // - input: wready
                 axi_w_if.wvalid = 1;
-                axi_w_if.wlast = 0; 
                 if (done_o)
                     state_n = IDLE;
             end
@@ -229,6 +228,7 @@ module DMA_ENGINE
                 end
 
                 WRITE_C: begin
+                    axi_w_if.wlast <= 0; 
                     if (axi_w_if.wready && axi_w_if.wvalid) begin
                         axi_w_if.wdata <= accum_i[count_c / 4][count_c % 4];
                         count_c <= count_c + 1;
