@@ -180,7 +180,6 @@ module DMA_ENGINE
             count_a <= 0;
             count_b <= 0;
             count_c <= 0;
-            mm_start_o <= 0;
 
         end else begin
             case (state)
