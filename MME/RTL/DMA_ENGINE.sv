@@ -77,8 +77,6 @@ module DMA_ENGINE
         
     always_comb begin 
         state_n = state;
-        buf_a_wren_o = 0;
-        buf_b_wren_o = 0;
 
         case (state)
             IDLE: begin
@@ -114,6 +112,10 @@ module DMA_ENGINE
 
     // Counters and addresses
     always @(posedge clk) begin
+
+        buf_a_wren_o <= 0;
+        buf_b_wren_o <= 0;
+
         if (!rst_n) begin
 
             buf_a_addr <= 0;
