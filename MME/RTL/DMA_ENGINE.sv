@@ -93,9 +93,10 @@ module DMA_ENGINE
                 axi_ar_if.arburst = 1;
                 axi_ar_if.arid = 0; 
                 axi_ar_if.araddr = mat_a_addr_i; 
+
                 if (axi_ar_if.arready)
                     axi_ar_if.arvalid = 0; 
-                else: 
+                else
                     state_n = ADDR_A;
 
                 if (!axi_ar_if.arvalid && !axi_ar_if.arready)
