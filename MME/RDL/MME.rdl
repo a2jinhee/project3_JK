@@ -76,6 +76,7 @@ addrmap MME_CFG {
                 Software must not initiate a DMA transfer when this field is 0.";
             sw = r;
          hw = w;
+         reset = 1'b1; 
         } done;
     } MME_STATUS;   // Without offset information,
                 // have a continous address next to the previous reg (0x210)
