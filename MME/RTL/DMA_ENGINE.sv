@@ -168,17 +168,11 @@ module DMA_ENGINE
             end
             DONE: begin
                 // B CHANNEL
-                // - output: bvalid, bid, bresp
-                // - input: bready
-                axi_b_if.bvalid = 1;
-                axi_b_if.bid = 0; 
+                // - output: bready
+                // - input: bvalid, bid, bresp
+                axi_b_if.bready = 1;
 
-                if (axi_b_if.bready)
-                    axi_b_if.bvalid = 0; 
-                else
-                    state_n = DONE;
-
-                if (!axi_b_if.bvalid && axi_b_if.bready)
+                if (axi_b_if.bvalid)
                     state_n = IDLE;
             end
 
