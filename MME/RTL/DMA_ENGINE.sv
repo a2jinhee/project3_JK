@@ -172,12 +172,7 @@ module DMA_ENGINE
                 // - input: bvalid, bid, bresp
                 axi_b_if.bready = 1;
 
-                if (axi_b_if.bready)
-                    axi_b_if.bvalid = 0; 
-                else
-                    state_n = DONE;
-
-                if (!axi_b_if.bvalid && axi_b_if.bready)
+                if (axi_b_if.bvalid)
                     state_n = IDLE;
             end
 
