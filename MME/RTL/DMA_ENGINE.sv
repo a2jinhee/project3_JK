@@ -171,6 +171,12 @@ module DMA_ENGINE
 
                 axi_b_if.bready = 1;
 
+                if (count_c == 16)
+                    axi_w_if.wlast = 1;
+                else
+                    axi_w_if.wlast = 0;
+
+
                 if (axi_b_if.bready && axi_b_if.bvalid)
                     state_n = IDLE;
             end
@@ -239,15 +245,14 @@ module DMA_ENGINE
                 end
 
                 WRITE_C: begin
-                    axi_w_if.wlast <= 0; 
                     if (axi_w_if.wready && axi_w_if.wvalid) begin
                         axi_w_if.wdata <= accum_i[count_c / 4][count_c % 4];
                         count_c <= count_c + 1;
                     end
 
                     if (count_c == 16) begin
-                        axi_w_if.wlast <= 1;
                         done_o <= 1;
+                        count_c <= 0; 
                     end
                 end
             endcase
