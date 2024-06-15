@@ -179,6 +179,7 @@ module DMA_ENGINE
 
                 if (axi_b_if.bready && axi_b_if.bvalid)
                     state_n = IDLE;
+                    axi_b_if.bready = 0;
             end
 
         endcase
