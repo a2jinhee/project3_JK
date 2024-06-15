@@ -164,22 +164,22 @@ module DMA_ENGINE
     end
 
     // Counters and addresses
-    always @(posedge clk) begin
+    always_comb begin
 
-        buf_a_wren_o <= 0;
-        buf_b_wren_o <= 0;
-        mm_start_o <= 0;
+        buf_a_wren_o = 0;
+        buf_b_wren_o = 0;
+        mm_start_o = 0;
 
         if (!rst_n) begin
 
-            buf_a_addr <= 0;
-            buf_b_addr <= 0;
-            buf_a_data <= 0;
-            buf_b_data <= 0;
-            count_a <= 0;
-            count_b <= 0;
-            count_c <= 0;
-            mm_start_o <= 0;
+            buf_a_addr = 0;
+            buf_b_addr = 0;
+            buf_a_data = 0;
+            buf_b_data = 0;
+            count_a = 0;
+            count_b = 0;
+            count_c = 0;
+            mm_start_o = 0;
 
         end else begin
             case (state)
@@ -187,48 +187,43 @@ module DMA_ENGINE
                 LOAD: begin                    
                     // buffer A - handshake && id
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
-                        buf_a_addr <= buf_a_addr;
-                        buf_a_data <= (buf_a_data << 32) | axi_r_if.rdata;
-                        count_a <= count_a + 1;
+                        buf_a_addr = buf_a_addr;
+                        buf_a_data = (buf_a_data << 32) | axi_r_if.rdata;
+                        count_a = count_a + 1;
                     end
 
                     if (count_a == 3) begin
-                        buf_a_wren_o <= 1;
-                        count_a <= 0;
-                        buf_a_addr <= buf_a_addr + 1;
+                        buf_a_wren_o = 1;
+                        count_a = 0;
+                        buf_a_addr = buf_a_addr + 1;
                     end
                     
                     // buffer B - handshake && id
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
-                        buf_b_addr <= buf_b_addr;
-                        case (count_b)
-                            0: buf_b_data[31 : 0] <= axi_r_if.rdata;
-                            1: buf_b_data[63 : 32] <= axi_r_if.rdata;
-                            2: buf_b_data[95 : 64] <= axi_r_if.rdata;
-                            3: buf_b_data[127 : 96] <= axi_r_if.rdata;
-                        endcase
-                        count_b <= count_b + 1;
+                        buf_b_addr = buf_b_addr;
+                        buf_b_data = (buf_b_data << 32) | axi_r_if.rdata;
+                        count_b = count_b + 1;
                     end
 
                     if (count_b == 3) begin
-                        buf_b_wren_o <= 1;
-                        count_b <= 0;
-                        buf_b_addr <= buf_b_addr + 1;
+                        buf_b_wren_o = 1;
+                        count_b = 0;
+                        buf_b_addr = buf_b_addr + 1;
                     end
 
                     if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
-                        mm_start_o <= 1;
+                        mm_start_o = 1;
                     
                 end
 
                 WRITE_C: begin
                     if (axi_w_if.wready && axi_w_if.wvalid) begin
-                        axi_w_if.wdata <= accum_i[count_c / 4][count_c % 4];
-                        count_c <= count_c + 1;
+                        axi_w_if.wdata = accum_i[count_c / 4][count_c % 4];
+                        count_c = count_c + 1;
                     end
 
                     if (count_c == 16) begin
-                        done_o <= 0;
+                        done_o = 0;
                     end
                 end
             endcase
