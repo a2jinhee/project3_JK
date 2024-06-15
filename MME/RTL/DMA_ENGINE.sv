@@ -75,20 +75,17 @@ module DMA_ENGINE
             state <= IDLE;
             count_a <= 0; 
             count_b <= 0;
-            count_c <= 0;
         end
         else begin
             state <= state_n;
             count_a <= count_a_n;
             count_b <= count_b_n;
-            count_c <= count_c_n;
         end
         
     always_comb begin 
         state_n = state;
         count_a_n = count_a;
         count_b_n = count_b;
-        count_c_n = count_c;
 
         case (state)
             IDLE: begin
