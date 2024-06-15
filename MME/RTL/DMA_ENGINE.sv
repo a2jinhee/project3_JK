@@ -210,8 +210,10 @@ module DMA_ENGINE
                     if (count_b == 3) begin
                         buf_b_wren_o <= 1;
                         count_b <= 0;
-                        buf_b_addr <= buf_b_addr + 1;
                     end
+
+                    if (buf_b_wren_o)
+                        buf_b_addr <= buf_b_addr + 1;
 
                     if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
                         mm_start_o <= 1;
