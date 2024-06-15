@@ -12,7 +12,7 @@
 `define     OFFSET_MME_STATUS   32'h210
 
 // `define 	TIMEOUT_DELAY 	99999999
-`define 	TIMEOUT_DELAY 	99999
+`define 	TIMEOUT_DELAY 	9999999
 
 
 module MME_TOP_TB ();
