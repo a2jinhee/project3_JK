@@ -99,7 +99,7 @@ module DMA_ENGINE
                 else
                     state_n = ADDR_A;
 
-                if (!axi_ar_if.arvalid && !axi_ar_if.arready)
+                if (!axi_ar_if.arvalid && axi_ar_if.arready)
                     state_n = ADDR_B;
             end
             ADDR_B: begin
