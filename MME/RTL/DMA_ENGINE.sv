@@ -71,16 +71,18 @@ module DMA_ENGINE
 
 
     always_ff @(posedge clk)
-        if (!rst_n)
+        if (!rst_n) begin
             state <= IDLE;
             count_a <= 0; 
             count_b <= 0;
             count_c <= 0;
-        else
+        end
+        else begin
             state <= state_n;
             count_a <= count_a_n;
             count_b <= count_b_n;
             count_c <= count_c_n;
+        end
         
     always_comb begin 
         state_n = state;
