@@ -238,6 +238,9 @@ module DMA_ENGINE
         // $display("buf_a_addr: %d, buf_b_addr: %d, count_a: %d, count_b: %d, buf_a_wren_o: %d, buf_b_wren_o: %d, buf_a_data: %h, buf_b_data: %h\n", buf_a_addr, buf_b_addr, count_a, count_b, buf_a_wren_o, buf_b_wren_o, buf_a_data, buf_b_data);   
         // $display("rready: %d, rvalid: %d, rid: %d, rdata: %h\n", axi_r_if.rready, axi_r_if.rvalid, axi_r_if.rid, axi_r_if.rdata);
 
+        // ADDR_C
+        $display("awvalid: %d, awlen: %d, awsize: %d, awburst: %d, awaddr: %d, awready: %d\n", axi_aw_if.awvalid, axi_aw_if.awlen, axi_aw_if.awsize, axi_aw_if.awburst, axi_aw_if.awaddr, axi_aw_if.awready);
+
         // WRITE_C 
         $display("count_c: %d, wready: %d, wvalid: %d, wdata: %h\n", count_c, axi_w_if.wready, axi_w_if.wvalid, axi_w_if.wdata);
 
