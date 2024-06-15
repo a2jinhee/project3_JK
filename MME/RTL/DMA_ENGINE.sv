@@ -94,7 +94,7 @@ module DMA_ENGINE
                 axi_ar_if.arid = 0; 
                 axi_ar_if.araddr = mat_a_addr_i; 
 
-                if (!axi_ar_if.arvalid)
+                if (!axi_ar_if.arready)
                     state_n = ADDR_B;
             end
             ADDR_B: begin
@@ -108,7 +108,7 @@ module DMA_ENGINE
                 axi_ar_if.arid = 1;
                 axi_ar_if.araddr = mat_b_addr_i; 
 
-                if (!axi_ar_if.arvalid)
+                if (!axi_ar_if.arready)
                     state_n = LOAD;
             end
             LOAD: begin
@@ -216,7 +216,7 @@ module DMA_ENGINE
             endcase
         end
         $display("state: %d, state_n: %d\n", state, state_n);
-        $display("arvalid: %d, arlen: %d, arsize: %d, arburst: %d, araddr: %d\n", axi_ar_if.arvalid, axi_ar_if.arlen, axi_ar_if.arsize, axi_ar_if.arburst, axi_ar_if.araddr);
+        $display("arvalid: %d, arlen: %d, arsize: %d, arburst: %d, araddr: %d, arready: %d\n", axi_ar_if.arvalid, axi_ar_if.arlen, axi_ar_if.arsize, axi_ar_if.arburst, axi_ar_if.araddr, axi_ar_if.arready);
         $display("axi_r_ready: %d, count_a: %d, count_b: %d, buf_a_wren_o: %d, buf_b_wren_o: %d\n", axi_r_if.rready, count_a, count_b, buf_a_wren_o, buf_b_wren_o);
 
     end
