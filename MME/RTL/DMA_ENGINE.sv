@@ -72,18 +72,19 @@ module DMA_ENGINE
 
 
     always_ff @(posedge clk)
-        if (!rst_n)
+        if (!rst_n) begin
             state <= IDLE;
             buf_a_data <= 0;
             buf_b_data <= 0;
             buf_a_addr <= 0;
             buf_b_addr <= 0;
-        else
+        end else begin
             state <= state_n;
             buf_a_data_n <= buf_a_data;
             buf_b_data_n <= buf_b_data;
             buf_a_addr_n <= buf_a_addr;
             buf_b_addr_n <= buf_b_addr;
+        end
 
         
     always_comb begin 
