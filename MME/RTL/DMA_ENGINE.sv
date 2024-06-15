@@ -126,7 +126,7 @@ module DMA_ENGINE
                 // - output: rready
                 // - input: rvalid, rid, rdata, rlast
                 axi_r_if.rready = 1;
-                if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
+                if ((buf_a_addr == mat_width_i - 1) && (buf_b_addr == mat_width_i - 1))
                     state_n = WAIT_MM;
             end
             WAIT_MM: begin
