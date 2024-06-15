@@ -189,7 +189,7 @@ module DMA_ENGINE
                         count_a <= count_a + 1;
                     end
 
-                    if (count_a == 4) begin
+                    if (count_a == 3) begin
                         buf_a_wren_o <= 1;
                         count_a <= 0;
                         buf_a_addr <= buf_a_addr + 1;
@@ -199,15 +199,15 @@ module DMA_ENGINE
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
                         buf_b_addr <= buf_b_addr;
                         case (count_b)
-                            0: buf_b_data[31 :0] <= axi_r_if.rdata;
-                            1: buf_b_data[63: 32] <= axi_r_if.rdata;
-                            2: buf_b_data[95:64] <= axi_r_if.rdata;
-                            3: buf_b_data[127: 96] <= axi_r_if.rdata;
+                            0: buf_b_data[31 : 0] <= axi_r_if.rdata;
+                            1: buf_b_data[63 : 32] <= axi_r_if.rdata;
+                            2: buf_b_data[95 : 64] <= axi_r_if.rdata;
+                            3: buf_b_data[127 : 96] <= axi_r_if.rdata;
                         endcase
                         count_b <= count_b + 1;
                     end
 
-                    if (count_b == 4) begin
+                    if (count_b == 3) begin
                         buf_b_wren_o <= 1;
                         count_b <= 0;
                         buf_b_addr <= buf_b_addr + 1;
