@@ -104,7 +104,7 @@ module DMA_ENGINE
                     state_n = WRITE_C;
             end
             WRITE_C: begin
-                if (count_c ==  16)
+                if (done_o)
                     state_n = IDLE;
             end
         endcase
@@ -230,10 +230,9 @@ module DMA_ENGINE
             endcase
         end
         $display("state: %d, state_n: %d\n", state, state_n);
-        // $display("a_read_count: %d, b_read_count: %d, c_write_count: %d\n", a_read_count, b_read_count, c_write_count);
-        // $display("axi_ar_if.araddr: %d\n", axi_ar_if.araddr);
-        // $display("buf_a_addr: %d, buf_b_addr: %d, buf_c_addr: %d\n", buf_a_addr, buf_b_addr, buf_c_addr);
-        // $display("mat_a_addr_i: %d, mat_b_addr_i: %d, mat_c_addr_i: %d\n", mat_a_addr_i, mat_b_addr_i, mat_c_addr_i);
+        $display("awvalid: %d, awlen: %d, awsize: %d, awburst: %d, awaddr: %d\n", axi_aw_if.awvalid, axi_aw_if.awlen, axi_aw_if.awsize, axi_aw_if.awburst, axi_aw_if.awaddr);
+        $display("axi_r_ready: %d, count_a: %d, count_b: %d, buf_a_wren_o: %d, buf_b_wren_o: %d\n", axi_r_if.rready, count_a, count_b, buf_a_wren_o, buf_b_wren_o);
+
     end
 
     assign buf_a_waddr_o = buf_a_addr;
