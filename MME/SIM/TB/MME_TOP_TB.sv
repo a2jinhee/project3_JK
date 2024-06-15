@@ -225,16 +225,16 @@ module MME_TOP_TB ();
                 int index = row*4+ col;
                 // *4 for byte address
                 data = u_mem.read_word(mat_c_addr+index*4);
-                if (data!==expected_c[row][col][31:0]) begin
-                    $display("Output mismatch at (%x, %d): expected=%x, real=%x", row, col, expected_c[row][col], data);
-                    @(posedge clk);
-                    $finish;
+                // if (data!==expected_c[row][col][31:0]) begin
+                $display("Output mismatch at (%x, %d): expected=%x, real=%x", row, col, expected_c[row][col], data);
+                @(posedge clk);
+                $finish;
                 end
                 else begin
                     $display("Output match at (%d, %d)", row, col);
                 end
             end
-        end
+        // end
 
         $display("---------------------------------------------------");
         $display("MM passed");
