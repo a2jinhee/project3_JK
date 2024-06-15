@@ -230,9 +230,6 @@ module MME_TOP_TB ();
                 @(posedge clk);
                 $finish;
                 end
-            else begin
-                $display("Output match at (%d, %d)", row, col);
-            end
             end
         // end
 
