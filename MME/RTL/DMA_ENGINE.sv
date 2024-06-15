@@ -83,8 +83,6 @@ module DMA_ENGINE
             IDLE: begin
                 if (start_i)
                     state_n = ADDR_A;
-                    burst_a = 0; 
-                    burst_b = 0; 
             end
             ADDR_A: begin
                 // AR CHANNEL
@@ -95,15 +93,14 @@ module DMA_ENGINE
                 axi_ar_if.arsize = 4;
                 axi_ar_if.arburst = 1;
                 axi_ar_if.arid = 0; 
-                axi_ar_if.araddr = mat_a_addr_i + 64*burst_a; 
+                axi_ar_if.araddr = mat_a_addr_i; 
 
                 if (axi_ar_if.arready) begin
                     axi_ar_if.arvalid = 0; 
-                    burst_a = burst_a + 1; 
                 end else
                     state_n = ADDR_A;
 
-                if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_a == (mat_width_i/4 - 1))
+                if (!axi_ar_if.arvalid && axi_ar_if.arready)
                     state_n = ADDR_B;
             end
             ADDR_B: begin
@@ -115,15 +112,14 @@ module DMA_ENGINE
                 axi_ar_if.arsize = 4;
                 axi_ar_if.arburst = 1;
                 axi_ar_if.arid = 1;
-                axi_ar_if.araddr = mat_b_addr_i+ 64*burst_b; 
+                axi_ar_if.araddr = mat_b_addr_i; 
 
                 if (axi_ar_if.arready) begin
                     axi_ar_if.arvalid = 0; 
-                    burst_b = burst_b + 1; 
                 end else
                     state_n = ADDR_B;
 
-                if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_b == (mat_width_i/4 - 1))
+                if (!axi_ar_if.arvalid && axi_ar_if.arready)
                     state_n = LOAD;
             end
             LOAD: begin
