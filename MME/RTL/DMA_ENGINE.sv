@@ -177,12 +177,12 @@ module DMA_ENGINE
                 LOAD: begin                    
                     // buffer A - handshake && id
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
-                        buf_a_addr <= 0;
+                        buf_a_addr <= buf_a_addr;
                         case (count_a)
                             0: buf_a_data[31 :0] <= axi_r_if.rdata;
-                            1: buf_a_data[63: 32] <= axi_r_if.rdata;
-                            2: buf_a_data[95:64] <= axi_r_if.rdata;
-                            3: buf_a_data[127: 96] <= axi_r_if.rdata;
+                            1: buf_a_data[63 : 32] <= axi_r_if.rdata;
+                            2: buf_a_data[95 : 64] <= axi_r_if.rdata;
+                            3: buf_a_data[127 : 96] <= axi_r_if.rdata;
                         endcase
                         count_a <= count_a + 1;
                     end
