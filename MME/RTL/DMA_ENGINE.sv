@@ -228,7 +228,7 @@ module DMA_ENGINE
                     end
 
                     if (count_c == 16) begin
-                        done_o <= 0;
+                        done_o <= 1;
                     end
                 end
             endcase
