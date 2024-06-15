@@ -244,7 +244,7 @@ module DMA_ENGINE
                 WRITE_C: begin
                     axi_w_if.wlast <= 0; 
                     if (axi_w_if.wready && axi_w_if.wvalid) begin
-                        axi_w_if.wdata <= accum_i[count_c / 4][count_c % 4];
+                        axi_w_if.wdata <= accum_i[count_c % 4][count_c / 4];
                         count_c <= count_c + 1;
                     end
 
