@@ -183,6 +183,7 @@ module DMA_ENGINE
 
 
                 if (axi_b_if.bready && axi_b_if.bvalid)
+                    done_o = 1;
                     state_n = IDLE;
             end
 
@@ -195,7 +196,6 @@ module DMA_ENGINE
         buf_a_wren_o <= 0;
         buf_b_wren_o <= 0;
         mm_start_o <= 0;
-        done_o <= 0; 
 
         if (!rst_n) begin
 
@@ -270,7 +270,6 @@ module DMA_ENGINE
                     end
 
                     if (count_c == 15) begin
-                        done_o <= 1;
                         count_c <= 0; 
                         burst_a <= 0; 
                         burst_b <= 0; 
