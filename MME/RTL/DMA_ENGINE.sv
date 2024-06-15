@@ -127,6 +127,7 @@ module DMA_ENGINE
                 // - input: rvalid, rid, rdata, rlast
                 axi_r_if.rready = 1;
                 if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
+                    mm_start_o = 1;
                     state_n = WAIT_MM;
             end
             WAIT_MM: begin
@@ -228,7 +229,7 @@ module DMA_ENGINE
                     end
 
                     if (count_c == 16) begin
-                        done_o <= 1;
+                        done_o <= 0;
                     end
                 end
             endcase
