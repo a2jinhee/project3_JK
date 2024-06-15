@@ -206,7 +206,7 @@ module DMA_ENGINE
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
                         buf_a_wbyteenable_o <= 'hffff;
                         buf_a_addr <= buf_a_addr;
-                        buf_a_data <= (buf_a_data << 32) | axi_r_if.rdata;
+                        buf_a_data <= (buf_a_data) | (axi_r_if.rdata << 32*count_a);
                         count_a <= count_a + 1;
                     end
 
@@ -222,7 +222,7 @@ module DMA_ENGINE
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
                         buf_b_wbyteenable_o <= 'hffff;
                         buf_b_addr <= buf_b_addr;
-                        buf_b_data <= (buf_b_data << 32) | axi_r_if.rdata;
+                        buf_b_data <= (buf_b_data) | (axi_r_if.rdata << 32*count_b);
                         count_b <= count_b + 1;
                     end
 
