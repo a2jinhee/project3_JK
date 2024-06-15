@@ -173,6 +173,8 @@ module DMA_ENGINE
         buf_a_wren_o <= 0;
         buf_b_wren_o <= 0;
         mm_start_o <= 0;
+        awi_w_if.wlast <= 0;
+        done_o <= 0; 
 
         if (!rst_n) begin
 
@@ -233,7 +235,8 @@ module DMA_ENGINE
                     end
 
                     if (count_c == 16) begin
-                        done_o <= 0;
+                        axi_w_if.wlast <= 1;
+                        done_o <= 1;
                     end
                 end
             endcase
