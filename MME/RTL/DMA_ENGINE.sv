@@ -182,7 +182,7 @@ module DMA_ENGINE
                 else
                     axi_w_if.wlast = 0;
 
-                if (axi_b_if.bready && axi_b_if.bvalid)
+                if (axi_b_if.bvalid)
                     state_n = IDLE;
                     done_o = 1;
             end
