@@ -95,14 +95,15 @@ module DMA_ENGINE
                 axi_ar_if.arsize = 4;
                 axi_ar_if.arburst = 1;
                 axi_ar_if.arid = 0; 
-                axi_ar_if.araddr = mat_a_addr_i; 
+                axi_ar_if.araddr = mat_a_addr_i + (burst_a * 64); 
 
                 if (axi_ar_if.arready)
                     axi_ar_if.arvalid = 0; 
+                    burst_a = burst_a + 1;
                 else
                     state_n = ADDR_A;
 
-                if (!axi_ar_if.arvalid && axi_ar_if.arready)
+                if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_a == (mat_width_i / 4 - 1))
                     state_n = ADDR_B;
             end
             ADDR_B: begin
