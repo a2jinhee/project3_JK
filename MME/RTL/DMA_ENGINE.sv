@@ -95,9 +95,9 @@ module DMA_ENGINE
                 axi_ar_if.arid = 0; 
                 axi_ar_if.araddr = mat_a_addr_i + (burst_a * 64); 
 
-                if (axi_ar_if.arready) begin
+                if (axi_ar_if.arready)
                     axi_ar_if.arvalid = 0; 
-                end else
+                else
                     state_n = ADDR_A;
 
                 if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_a == (mat_width_i / 4 - 1))
@@ -112,14 +112,14 @@ module DMA_ENGINE
                 axi_ar_if.arsize = 4;
                 axi_ar_if.arburst = 1;
                 axi_ar_if.arid = 1;
-                axi_ar_if.araddr = mat_b_addr_i; 
+                axi_ar_if.araddr = mat_b_addr_i + (burst_b * 64); 
 
                 if (axi_ar_if.arready)
                     axi_ar_if.arvalid = 0; 
                 else
                     state_n = ADDR_B;
 
-                if (!axi_ar_if.arvalid && axi_ar_if.arready)
+                if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_b == (mat_width_i / 4 - 1))
                     state_n = LOAD;
             end
             LOAD: begin
@@ -209,6 +209,7 @@ module DMA_ENGINE
             mm_start_o <= 0;
 
             burst_a <= 0;
+            burst_b <= 0;
 
         end else begin
             case (state)
@@ -216,6 +217,12 @@ module DMA_ENGINE
                 ADDR_A: begin
                     if (axi_ar_if.arready) begin
                         burst_a <= burst_a + 1;
+                    end
+                end
+
+                ADDR_B: begin
+                    if (axi_ar_if.arready) begin
+                        burst_b <= burst_b + 1;
                     end
                 end
 
