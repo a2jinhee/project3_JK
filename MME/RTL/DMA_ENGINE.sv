@@ -272,6 +272,8 @@ module DMA_ENGINE
                     if (count_c == 15) begin
                         done_o <= 1;
                         count_c <= 0; 
+                        burst_a <= 0; 
+                        burst_b <= 0; 
                     end
                 end
             endcase
