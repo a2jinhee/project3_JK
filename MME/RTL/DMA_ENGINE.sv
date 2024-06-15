@@ -213,7 +213,7 @@ module DMA_ENGINE
         end else begin
             case (state)
 
-                A_ADDR: begin
+                ADDR_A: begin
                     if (axi_ar_if.arready) begin
                         burst_a <= burst_a + 1;
                     end
