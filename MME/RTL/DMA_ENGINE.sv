@@ -131,7 +131,7 @@ module DMA_ENGINE
                 axi_aw_if.awlen = 15;
                 axi_aw_if.awsize = 4;
                 axi_aw_if.awburst = 1;
-                axi_aw_if.awaddr <= mat_c_addr_i; 
+                axi_aw_if.awaddr = mat_c_addr_i; 
 
                 if (!axi_ar_if.arvalid)
                     state_n = WRITE_C;
@@ -145,6 +145,8 @@ module DMA_ENGINE
                     state_n = IDLE;
             end
         endcase
+        $display("state: %d, state_n: %d\n", state, state_n);
+        $display("awvalid: %d, awlen: %d, awsize: %d, awburst: %d, awaddr: %d\n", axi_aw_if.awvalid, axi_aw_if.awlen, axi_aw_if.awsize, axi_aw_if.awburst, axi_aw_if.awaddr);
     end
 
     // Counters and addresses
@@ -215,8 +217,7 @@ module DMA_ENGINE
                 end
             endcase
         end
-        $display("state: %d, state_n: %d\n", state, state_n);
-        $display("awvalid: %d, awlen: %d, awsize: %d, awburst: %d, awaddr: %d\n", axi_aw_if.awvalid, axi_aw_if.awlen, axi_aw_if.awsize, axi_aw_if.awburst, axi_aw_if.awaddr);
+        
         $display("axi_r_ready: %d, count_a: %d, count_b: %d, buf_a_wren_o: %d, buf_b_wren_o: %d\n", axi_r_if.rready, count_a, count_b, buf_a_wren_o, buf_b_wren_o);
 
     end
