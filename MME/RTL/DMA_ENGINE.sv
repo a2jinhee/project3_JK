@@ -84,11 +84,11 @@ module DMA_ENGINE
                     state_n = ADDR_A;
             end
             ADDR_A: begin
-                if (axi_ar_if.arready)
+                if (!axi_ar_if.arvalid)
                     state_n = ADDR_B;
             end
             ADDR_B: begin
-                if (axi_ar_if.arready)
+                if (!axi_ar_if.arvalid)
                     state_n = LOAD;
             end
             LOAD: begin
