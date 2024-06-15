@@ -11,9 +11,7 @@
 `define     OFFSET_MME_CMD      32'h20C
 `define     OFFSET_MME_STATUS   32'h210
 
-`define 	TIMEOUT_DELAY 	99999999
-// `define 	TIMEOUT_DELAY 	99999
-
+`define    TIMEOUT_DELAY    99999999
 
 module MME_TOP_TB ();
 
@@ -38,11 +36,11 @@ module MME_TOP_TB ();
         rst_n                   = 1'b1;     // release the reset
     end
 
-	// timeout
-	initial begin
-		#`TIMEOUT_DELAY $display("Timeout!");
-		$finish;
-	end
+   // timeout
+   initial begin
+      #`TIMEOUT_DELAY $display("Timeout!");
+      $finish;
+   end
 
     // enable waveform dump
     initial begin
@@ -143,6 +141,16 @@ module MME_TOP_TB ();
             mat_b[row][col]                 = $urandom()%256;
           end
         end
+//        for (int i=0; i<mat_width; i++) begin
+//            for (int j=0; j<4; j++) begin
+//                //mat_a[i][j]                 = 32'h1;
+//                //mat_b[j][i]                 = 32'h1;
+//                //mat_a[i][j]                 = i*'h10+j;
+//                //mat_b[j][i]                 = i*'h100+j;
+//                mat_a[j][i]                 = $urandom()%256;
+//                mat_b[i][j]                 = $urandom()%256;
+//            end
+//        end
     endtask
 
     // test matrix multiplication
