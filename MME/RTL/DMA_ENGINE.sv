@@ -78,7 +78,6 @@ module DMA_ENGINE
         
     always_comb begin 
         state_n = state;
-        done_o = 0;
 
         case (state)
             IDLE: begin
@@ -184,7 +183,6 @@ module DMA_ENGINE
 
 
                 if (axi_b_if.bready && axi_b_if.bvalid)
-                    done_o = 1;
                     state_n = IDLE;
             end
 
@@ -301,6 +299,8 @@ module DMA_ENGINE
 
     assign buf_b_waddr_o = buf_b_addr;
     assign buf_b_wdata_o = buf_b_data;
+
+    assign done_o = (axi_b_if.bready && axi_b_if.bvalid); 
 
 
     
