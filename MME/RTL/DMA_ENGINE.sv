@@ -67,7 +67,6 @@ module DMA_ENGINE
     reg [BUF_DW-1:0] buf_a_data, buf_b_data;
     reg [BUF_AW-1:0] buf_a_addr, buf_b_addr;
     reg [5:0] count_a, count_b, count_c; 
-    reg [2:0] burst_a, burst_b; 
 
 
     always_ff @(posedge clk)
@@ -95,9 +94,9 @@ module DMA_ENGINE
                 axi_ar_if.arid = 0; 
                 axi_ar_if.araddr = mat_a_addr_i; 
 
-                if (axi_ar_if.arready) begin
+                if (axi_ar_if.arready)
                     axi_ar_if.arvalid = 0; 
-                end else
+                else
                     state_n = ADDR_A;
 
                 if (!axi_ar_if.arvalid && axi_ar_if.arready)
@@ -114,9 +113,9 @@ module DMA_ENGINE
                 axi_ar_if.arid = 1;
                 axi_ar_if.araddr = mat_b_addr_i; 
 
-                if (axi_ar_if.arready) begin
+                if (axi_ar_if.arready)
                     axi_ar_if.arvalid = 0; 
-                end else
+                else
                     state_n = ADDR_B;
 
                 if (!axi_ar_if.arvalid && axi_ar_if.arready)
