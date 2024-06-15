@@ -226,8 +226,9 @@ module DMA_ENGINE
             endcase
         end
         $display("state: %d, state_n: %d\n", state, state_n);
-        $display("arvalid: %d, arlen: %d, arsize: %d, arburst: %d, araddr: %d, arready: %d\n", axi_ar_if.arvalid, axi_ar_if.arlen, axi_ar_if.arsize, axi_ar_if.arburst, axi_ar_if.araddr, axi_ar_if.arready);
-        $display("axi_r_ready: %d, count_a: %d, count_b: %d, buf_a_wren_o: %d, buf_b_wren_o: %d\n", axi_r_if.rready, count_a, count_b, buf_a_wren_o, buf_b_wren_o);
+        // $display("arvalid: %d, arlen: %d, arsize: %d, arburst: %d, araddr: %d, arready: %d\n", axi_ar_if.arvalid, axi_ar_if.arlen, axi_ar_if.arsize, axi_ar_if.arburst, axi_ar_if.araddr, axi_ar_if.arready);
+        $display("buf_a_addr: %d, buf_b_addr: %d, count_a: %d, count_b: %, buf_a_wren_o: %d, buf_b_wren_o: %d\n", buf_a_addr, buf_b_addr, count_a, count_b, buf_a_wren_o, buf_b_wren_o);
+        $display("rready: %d, rvalid: %d, rid: %d, rdata: %d\n", axi_r_if.rready, axi_r_if.rvalid, axi_r_if.rid, axi_r_if.rdata);
 
     end
 
