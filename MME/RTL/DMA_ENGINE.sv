@@ -95,7 +95,7 @@ module DMA_ENGINE
                 axi_ar_if.arsize = 4;
                 axi_ar_if.arburst = 1;
                 axi_ar_if.arid = 0; 
-                axi_ar_if.araddr = mat_a_addr_i + (burst_a * 64); 
+                axi_ar_if.araddr = mat_a_addr_i + (burst_a * 'd64); 
 
                 if (axi_ar_if.arready) begin
                     axi_ar_if.arvalid = 0; 
