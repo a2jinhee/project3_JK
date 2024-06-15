@@ -67,6 +67,7 @@ module DMA_ENGINE
     reg [BUF_DW-1:0] buf_a_data, buf_b_data;
     reg [BUF_AW-1:0] buf_a_addr, buf_b_addr;
     reg [5:0] count_a, count_b, count_c; 
+    reg flag; 
 
 
     always_ff @(posedge clk)
@@ -82,6 +83,7 @@ module DMA_ENGINE
             IDLE: begin
                 if (start_i)
                     state_n = ADDR_A;
+                    flag = 0; 
             end
             ADDR_A: begin
                 // AR CHANNEL
@@ -130,8 +132,14 @@ module DMA_ENGINE
                     state_n = WAIT_MM;
             end
             WAIT_MM: begin
-                if (mm_done_i)
+                if (!mm_done_i)
+                    state_n = WAIT_MM;
+                    flag = 1;
+
+                if (mm_done_i && flag)
                     state_n = ADDR_C;
+                else
+                    state_n = WAIT_MM;
             end
             ADDR_C: begin
                 // AW CHANNEL
