@@ -67,6 +67,7 @@ module DMA_ENGINE
     reg [BUF_DW-1:0] buf_a_data, buf_b_data;
     reg [BUF_AW-1:0] buf_a_addr, buf_b_addr;
     reg [5:0] count_a, count_b, count_c; 
+    reg [3:0] burst_a, burst_b; 
 
 
     always_ff @(posedge clk)
@@ -82,6 +83,8 @@ module DMA_ENGINE
             IDLE: begin
                 if (start_i)
                     state_n = ADDR_A;
+                    burst_a = 0; 
+                    burst_b = 0; 
             end
             ADDR_A: begin
                 // AR CHANNEL
