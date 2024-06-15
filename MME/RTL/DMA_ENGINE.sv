@@ -131,7 +131,7 @@ module DMA_ENGINE
             end
             WAIT_MM: begin
                 if (mm_done_i)
-                    state_n = WRITE_C;
+                    state_n = ADDR_C;
             end
             ADDR_C: begin
                 // AW CHANNEL
