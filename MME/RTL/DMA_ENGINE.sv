@@ -77,7 +77,6 @@ module DMA_ENGINE
         
     always_comb begin 
         state_n = state;
-        mm_start_o = 0;
 
         case (state)
             IDLE: begin
@@ -128,7 +127,6 @@ module DMA_ENGINE
                 // - input: rvalid, rid, rdata, rlast
                 axi_r_if.rready = 1;
                 if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
-                    mm_start_o = 1;
                     state_n = WAIT_MM;
             end
             WAIT_MM: begin
@@ -180,6 +178,7 @@ module DMA_ENGINE
             count_a <= 0;
             count_b <= 0;
             count_c <= 0;
+            mm_start_o <= 0;
 
         end else begin
             case (state)
@@ -220,6 +219,9 @@ module DMA_ENGINE
                         count_b <= 0;
                         buf_b_addr <= buf_b_addr + 1;
                     end
+
+                    if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
+                        mm_start_o <= 1;
                     
                 end
 
