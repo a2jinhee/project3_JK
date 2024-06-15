@@ -168,6 +168,7 @@ module DMA_ENGINE
 
         buf_a_wren_o <= 0;
         buf_b_wren_o <= 0;
+        mm_start_o <= 0;
 
         if (!rst_n) begin
 
