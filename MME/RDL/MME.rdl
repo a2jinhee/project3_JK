@@ -8,76 +8,77 @@ addrmap MME_CFG {
     desc = "Address map of ECE4278 Matrix Multiplication Engine project";
 
     // TODO: implement me
+
     reg {
         field {
-            desc = "The version of this MME.
-            The upper 16 bits represent the major version.
-            The middle 8 bits represent the minor version.
-            The lowest 8 bits represent the micro version.
-               This document describes behaviors of major verion 2.";
+            desc = "The version of this MME controller.
+				The upper 16 bits represent the major version.
+				The middle 8 bits represent the minor version.
+				The lowest 8 bits represent the micro version.
+			   	This document describes behaviors of major verion 2.";
             sw = r;
             hw = na;
-            reset = 32'h0001_2024;
-        } version[31:0];   // 32b field
-    } MME_VER @0x00;      // offset = 0
+            reset = 32'h0001_0101;
+        } version[31:0];	// 32b field
+    } MME_VER @0x0;		// offset = 0
 
     reg {
         field {
-            desc = "The matirx width of the MME.";
+            desc = "mat_width";
             sw = rw;
-            hw = r;
+            hw = r; // check
+            reset = 8'h00;
+        } mat_width[7:0];	// 32b field
+    } MAT_CFG @0x100;	// offset = 0x100
+    
+    reg {
+        field {
+            desc = "The start address of matrix A";
+            sw = rw;
+            hw = r; // check
             reset = 32'h0000_0000;
-        } mat_width[31:0];   // 32b field
-    } MAT_CFG @0x100;   // offset = 0x100
+        } start_addr[31:0];	// 32b field
+    } MAT_A_ADDR @0x200;	
 
     reg {
         field {
-            desc = "The start address of the matrix A.";
+            desc = "The start address of matrix B";
             sw = rw;
-            hw = r;
-            reset = 32'h0000_0000;
-        } start_addr[31:0];   // 32b field
-    } MAT_A_ADDR @0x200;
+            hw = r; // check
+            reset = 16'h0000;
+        } start_addr[31:0];	// 32b field
+    } MAT_B_ADDR @0x204;
 
     reg {
         field {
-            desc = "The start address of the matrix B.";
+            desc = "The start address of matrix C";
             sw = rw;
-            hw = r;
-            reset = 32'h0000_0000;
-        } start_addr[31:0];   // 32b field
-    } MAT_B_ADDR @0x204;   
+            hw = r; // check
+            reset = 16'h0000;
+        } start_addr[31:0];	// 32b field
+    } MAT_C_ADDR @0x208;
 
     reg {
         field {
-            desc = "The start address of the matrix C.";
-            sw = rw;
-            hw = r;
-            reset = 32'h0000_0000;
-        } start_addr[31:0];   // 32b field
-    } MAT_C_ADDR @0x208;   
-                               
-    reg {
-        field {
-            desc = "Writing 1 to this field will initiate a DMA transfer based on MAT_CFG, MAT_A_ADDR, MAT_B_ADDR, MAT_C_ADDR.
-            Software must not write 1 when there's an on-going transfer.
-               Writing 0 to this field does not affect operation.";
-         sw = w;
-         hw = r;
+            desc = "Writing 1 to this field will initiate a MM based on MAT_CFG, MAT_A_ADDR, MAT_B_ADDR and MAT_C_ADDR
+				Software must not write 1 when there's an on-going transfer.
+			   	Writing 0 to this field does not affect operation.";
+			sw = w;
+			hw = r; // check
             singlepulse;
-            reset = 1'b0;
+            reset = 1'b0; 
         } start;
-    } MME_CMD;   // Without offset information, this register will
-                // have a continous address next to the previous reg (0x20C)
+    } MME_CMD @0x20C;	
+
     reg {
         field {
-            desc = "This field is 1 when there's no on-going DMA transfer.
-                Software must wait this field to be 1 for a completion of a transfer
-                Software must not initiate a DMA transfer when this field is 0.";
+            desc = "This field is 1 when there's no on-going MM.
+                Software must wait this field to be 1 for a completion of a MM
+                Software must not initiate a MM when this field is 0.";
             sw = r;
-         hw = w;
-         reset = 1'b1; 
+			hw = w; // check
+            reset = 1'b1; 
         } done;
-    } MME_STATUS;   // Without offset information,
-                // have a continous address next to the previous reg (0x210)
+    } MME_STATUS @0x210;		
+
 };
