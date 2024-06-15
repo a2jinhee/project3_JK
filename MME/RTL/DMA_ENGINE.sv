@@ -126,7 +126,7 @@ module DMA_ENGINE
                 // - output: rready
                 // - input: rvalid, rid, rdata, rlast
                 axi_r_if.rready = 1;
-                if ((buf_a_addr / 4 == mat_width_i) && (buf_b_addr / 4 == mat_width_i))
+                if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
                     state_n = WAIT_MM;
             end
             WAIT_MM: begin
@@ -179,7 +179,7 @@ module DMA_ENGINE
                 LOAD: begin                    
                     // buffer A - handshake && id
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
-                        // buf_a_addr <= buf_a_addr;
+                        buf_a_addr <= buf_a_addr;
                         case (count_a)
                             0: buf_a_data[31 :0] <= axi_r_if.rdata;
                             1: buf_a_data[63 : 32] <= axi_r_if.rdata;
@@ -192,12 +192,12 @@ module DMA_ENGINE
                     if (count_a == 4) begin
                         buf_a_wren_o <= 1;
                         count_a <= 0;
-                        buf_a_addr <= buf_a_addr + 4;
+                        buf_a_addr <= buf_a_addr + 1;
                     end
                     
                     // buffer B - handshake && id
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
-                        buf_b_addr <= 0;
+                        buf_b_addr <= buf_b_addr;
                         case (count_b)
                             0: buf_b_data[31 :0] <= axi_r_if.rdata;
                             1: buf_b_data[63: 32] <= axi_r_if.rdata;
@@ -210,7 +210,7 @@ module DMA_ENGINE
                     if (count_b == 4) begin
                         buf_b_wren_o <= 1;
                         count_b <= 0;
-                        buf_b_addr <= buf_b_addr + 4;
+                        buf_b_addr <= buf_b_addr + 1;
                     end
                     
                 end
