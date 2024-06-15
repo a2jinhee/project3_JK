@@ -61,8 +61,7 @@ module DMA_ENGINE
                 LOAD        = 3'b011,
                 WAIT_MM     = 3'b100,
                 ADDR_C      = 3'b101,
-                WRITE_C     = 3'b110,
-                DONE        = 3'b111;
+                WRITE_C     = 3'b110;
 
     reg [2:0] state, state_n;
     reg [BUF_DW-1:0] buf_a_data, buf_b_data;
@@ -162,21 +161,17 @@ module DMA_ENGINE
                 // W CHANNEL
                 // - output: wvalid, wid, wdata, wlast
                 // - input: wready
-                axi_w_if.wvalid = 1;
-                axi_b_if.bready = 1;
-                axi_w_if.wid = 0;
-                axi_w_if.wstrb = 'hf;
-
-                if (axi_w_if.wlast)
-                    state_n = DONE;
-            end
-            DONE: begin
                 // B CHANNEL
                 // - output: bready
                 // - input: bvalid, bid, bresp
-                
 
-                if (axi_b_if.bvalid)
+                axi_w_if.wvalid = 1;
+                axi_w_if.wid = 0;
+                axi_w_if.wstrb = 'hf;
+
+                axi_b_if.bready = 1;
+
+                if (axi_b_if.bready && axi_b_if.bvalid)
                     state_n = IDLE;
             end
 
