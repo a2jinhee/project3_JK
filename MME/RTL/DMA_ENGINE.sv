@@ -62,6 +62,7 @@ module DMA_ENGINE
                 WAIT_MM     = 3'b100,
                 ADDR_C      = 3'b101,
                 WRITE_C     = 3'b110;
+                DONE        = 3'b111;
 
     reg [2:0] state, state_n;
     reg [BUF_DW-1:0] buf_a_data, buf_b_data;
@@ -145,6 +146,7 @@ module DMA_ENGINE
                 axi_aw_if.awlen = 15;
                 axi_aw_if.awsize = 4;
                 axi_aw_if.awburst = 1;
+                axi_aw_if.awid = 0;
                 axi_aw_if.awaddr = mat_c_addr_i; 
 
                 if (axi_aw_if.awready)
@@ -161,9 +163,25 @@ module DMA_ENGINE
                 // - output: wvalid, wid, wdata, wlast
                 // - input: wready
                 axi_w_if.wvalid = 1;
-                if (done_o)
+                if (axi_w_if.wlast)
+                    state_n = DONE;
+            end
+            DONE: begin
+                // B CHANNEL
+                // - output: bvalid, bid, bresp
+                // - input: bready
+                axi_b_if.bvalid = 1;
+                axi_b_if.bid = 0; 
+
+                if (axi_b_if.bready)
+                    axi_b_if.bvalid = 0; 
+                else
+                    state_n = DONE;
+
+                if (!axi_b_if.bvalid && axi_b_if.bready)
                     state_n = IDLE;
             end
+
         endcase
     end
 
