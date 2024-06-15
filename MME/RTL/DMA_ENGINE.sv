@@ -66,7 +66,7 @@ module DMA_ENGINE
     reg [2:0] state, state_n;
     reg [BUF_DW-1:0] buf_a_data, buf_b_data;
     reg [BUF_AW-1:0] buf_a_addr, buf_b_addr;
-    reg [2:0] count_a, count_b, count_c; 
+    reg [5:0] count_a, count_b, count_c; 
 
 
     always_ff @(posedge clk)
