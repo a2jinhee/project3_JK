@@ -11,8 +11,8 @@
 `define     OFFSET_MME_CMD      32'h20C
 `define     OFFSET_MME_STATUS   32'h210
 
-`define 	TIMEOUT_DELAY 	99999999
-// `define 	TIMEOUT_DELAY 	9999
+// `define 	TIMEOUT_DELAY 	99999999
+`define 	TIMEOUT_DELAY 	99999
 
 
 module MME_TOP_TB ();
@@ -225,13 +225,10 @@ module MME_TOP_TB ();
                 int index = row*4+ col;
                 // *4 for byte address
                 data = u_mem.read_word(mat_c_addr+index*4);
-                // if (data!==expected_c[row][col][31:0]) begin
                 $display("Output mismatch at (%x, %d): expected=%x, real=%x", row, col, expected_c[row][col], data);
-                @(posedge clk);
-                $finish;
-                end
+                    
             end
-        // end
+        end
 
         $display("---------------------------------------------------");
         $display("MM passed");
