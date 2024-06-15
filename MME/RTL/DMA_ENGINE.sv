@@ -182,8 +182,8 @@ module DMA_ENGINE
                     axi_w_if.wlast = 0;
 
                 if (axi_b_if.bready && axi_b_if.bvalid)
-                    axi_b_if.bready = 0;
                     state_n = IDLE;
+                    done_o = 1;
             end
 
         endcase
@@ -300,6 +300,6 @@ module DMA_ENGINE
     assign buf_b_waddr_o = buf_b_addr;
     assign buf_b_wdata_o = buf_b_data;
 
-    assign done_o = (axi_b_if.bvalid && axi_b_if.bready && count_c == 0);
+
     
 endmodule
