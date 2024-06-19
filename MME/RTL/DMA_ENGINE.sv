@@ -205,7 +205,9 @@ module DMA_ENGINE
                 buf_a_addr_n = 0; 
                 buf_b_addr_n = 0;
                 done_o = 0;
+
                 if (mm_start_o)
+                    mm_start_o = 0; 
                     state_n = WAIT_MM;
 
                 if (mm_done_i && !mm_start_o)
