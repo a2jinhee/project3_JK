@@ -115,8 +115,6 @@ module DMA_ENGINE
 
                 if (axi_ar_if.arready)
                     axi_ar_if.arvalid = 0; 
-                else
-                    state_n = ADDR_A;
 
                 if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_a == (mat_width_i / 4 - 1))
                     state_n = ADDR_B;
@@ -131,9 +129,7 @@ module DMA_ENGINE
                 axi_ar_if.araddr = mat_b_addr_i + (burst_b * 64); 
 
                 if (axi_ar_if.arready)
-                    axi_ar_if.arvalid = 0; 
-                else
-                    state_n = ADDR_B;
+                    axi_ar_if.arvalid = 0;
 
                 if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_b == (mat_width_i / 4 - 1))
                     state_n = LOAD;
@@ -167,8 +163,6 @@ module DMA_ENGINE
 
                 if (axi_aw_if.awready)
                     axi_aw_if.awvalid = 0; 
-                else
-                    state_n = ADDR_C;
 
                 if (!axi_aw_if.awvalid && axi_aw_if.awready)
                     state_n = WRITE_C;
