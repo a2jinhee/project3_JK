@@ -195,13 +195,12 @@ module DMA_ENGINE
                     buf_b_addr_n = buf_b_addr + 1;
                 end
 
-
                 if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
                     state_n = WAIT_MM;
-                    mm_start_o = 1;
                     
             end
             WAIT_MM: begin
+                mm_start_o = 1; 
                 buf_a_addr_n = 0; 
                 buf_b_addr_n = 0;
                 done_o = 0;
