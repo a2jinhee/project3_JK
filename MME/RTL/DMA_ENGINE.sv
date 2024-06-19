@@ -207,23 +207,16 @@ module DMA_ENGINE
     // Counters and addresses
     always @(posedge clk) begin
 
-        buf_a_wren_o <= 0;
-        buf_b_wren_o <= 0;
+        buf_a_wren_o <= 0; buf_b_wren_o <= 0;
         mm_start_o <= 0;
 
         if (!rst_n) begin
 
-            buf_a_addr <= 0;
-            buf_b_addr <= 0;
-            buf_a_data <= 0;
-            buf_b_data <= 0;
-            count_a <= 0;
-            count_b <= 0;
-            count_c <= 0;
+            buf_a_addr <= 0; buf_b_addr <= 0;
+            buf_a_data <= 0; buf_b_data <= 0;
+            count_a <= 0; count_b <= 0; count_c <= 0;
+            burst_a <= 0; burst_b <= 0;
             mm_start_o <= 0;
-
-            burst_a <= 0;
-            burst_b <= 0;
 
         end else begin
             case (state)
