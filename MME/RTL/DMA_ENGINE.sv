@@ -96,9 +96,9 @@ module DMA_ENGINE
         axi_r_if.rready = 0;
         done_o = 1;
 
-        if (!rst_n)
+        if (!rst_n) begin
             burst_a = 0; burst_b = 0;   
-        else begin
+        end else begin
             case (state)
                 IDLE: begin
                     if (start_i) begin
