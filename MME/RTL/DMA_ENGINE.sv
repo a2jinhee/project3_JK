@@ -57,9 +57,9 @@ module DMA_ENGINE
                 WRITE_C     = 3'b110;
 
     reg [2:0] state, state_n;
-    reg [BUF_DW-1:0] buf_a_data, buf_b_data; buf_a_data_n; buf_b_data_n;
-    reg [BUF_AW-1:0] buf_a_addr, buf_b_addr; buf_a_addr_n, buf_b_addr_n;
-    reg [2:0] count_a, count_b; count_a_n; count_b_n;
+    reg [BUF_DW-1:0] buf_a_data, buf_b_data, buf_a_data_n, buf_b_data_n;
+    reg [BUF_AW-1:0] buf_a_addr, buf_b_addr, buf_a_addr_n, buf_b_addr_n;
+    reg [2:0] count_a, count_b, count_a_n, count_b_n;
     reg [4:0] count_c, count_c_n; 
     reg [1:0] burst_a, burst_b; 
     reg [1:0] burst_a_n, burst_b_n;
