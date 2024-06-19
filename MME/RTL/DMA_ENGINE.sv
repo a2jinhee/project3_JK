@@ -82,7 +82,7 @@ module DMA_ENGINE
             count_c <= count_c_n;
         end
         
-    always @(*) begin
+    always_comb begin 
         state_n = state;
         burst_a_n = burst_a; burst_b_n = burst_b;
         count_c_n = count_c;
@@ -104,7 +104,8 @@ module DMA_ENGINE
         // AXI interface R channel
         axi_r_if.rready = 0;
         done_o = 1;
-        mm_start_o 	= 1'b0;
+        buf_a_wbyteenable_o = 'hffff;
+        buf_b_wbyteenable_o = 'hffff;
 
         case (state)
             IDLE: begin
@@ -161,11 +162,9 @@ module DMA_ENGINE
                 axi_r_if.rready = 1;
                 if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
                     state_n = WAIT_MM;
-                    mm_start_o = 1'b1; 
             end
             WAIT_MM: begin
                 done_o = 0;
-                
                 if (mm_start_o)
                     state_n = WAIT_MM;
 
@@ -232,12 +231,14 @@ module DMA_ENGINE
     always @(posedge clk) begin
 
         buf_a_wren_o <= 0; buf_b_wren_o <= 0;
+        mm_start_o <= 0;
 
         if (!rst_n) begin
 
             buf_a_addr <= 0; buf_b_addr <= 0;
             buf_a_data <= 0; buf_b_data <= 0;
             count_a <= 0; count_b <= 0;
+            mm_start_o <= 0;
 
         end else begin
             case (state)
@@ -249,7 +250,6 @@ module DMA_ENGINE
 
                     // buffer A - handshake && id
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
-                        buf_a_wbyteenable_o <= 'hffff;
                         buf_a_addr <= buf_a_addr;
                         buf_a_data <= (buf_a_data << 32) | axi_r_if.rdata;
                         count_a <= count_a + 1;
@@ -265,7 +265,6 @@ module DMA_ENGINE
                     
                     // buffer B - handshake && id
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
-                        buf_b_wbyteenable_o <= 'hffff;
                         buf_b_addr <= buf_b_addr;
                         buf_b_data <= (buf_b_data << 32) | axi_r_if.rdata;
                         count_b <= count_b + 1;
@@ -278,6 +277,9 @@ module DMA_ENGINE
 
                     if (buf_b_wren_o)
                         buf_b_addr <= buf_b_addr + 1;
+                    
+                    if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
+                        mm_start_o <= 1;
                     
                 end
 
