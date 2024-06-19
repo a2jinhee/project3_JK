@@ -117,6 +117,7 @@ module DMA_ENGINE
         buf_b_wbyteenable_o = 'hffff;
 
         buf_a_wren_o = 0; buf_b_wren_o = 0;
+        mm_start_o = 0;
 
         case (state)
             IDLE: begin
@@ -183,9 +184,6 @@ module DMA_ENGINE
                     buf_a_addr_n = buf_a_addr + 1;
                 end
 
-                // if (buf_a_wren_o)
-                //     buf_a_addr_n = buf_a_addr + 1;
-
                 if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
                     buf_b_data_n = (buf_b_data << 32) | axi_r_if.rdata;
                     count_b_n = count_b + 1;
@@ -197,12 +195,10 @@ module DMA_ENGINE
                     buf_b_addr_n = buf_b_addr + 1;
                 end
 
-                // if (buf_b_wren_o)
-                //     buf_b_addr_n = buf_b_addr + 1;
-
 
                 if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
                     state_n = WAIT_MM;
+                    mm_start_o = 1;
                     
             end
             WAIT_MM: begin
@@ -271,76 +267,37 @@ module DMA_ENGINE
         endcase
     end
 
-    // Counters and addresses
-    always @(posedge clk) begin
+    // // Counters and addresses
+    // always @(posedge clk) begin
+    //     mm_start_o <= 0;
 
-        // buf_a_wren_o <= 0; buf_b_wren_o <= 0;
-        mm_start_o <= 0;
-
-        if (!rst_n) begin
-
-            // buf_a_addr <= 0; buf_b_addr <= 0;
-            mm_start_o <= 0;
-
-        end else begin
-            case (state)
-
-                LOAD: begin
-                    // Write mem data to buffer when handshake && id (A if id==0, B if id==1)
-                    // reset count every 128b=16B (burst is 4B*16=64B)
-                    // set buffer write enable to 1 every 128b=16B
-
-                    // buffer A - handshake && id
-                    // if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
-                    //     buf_a_addr <= buf_a_addr;
-                        
-                    // end
-
-                    // if (count_a == 3) begin
-                    //     buf_a_wren_o <= 1;
-                    // end
-
-                    // if (buf_a_wren_o)
-                    //     buf_a_addr <= buf_a_addr + 1;
+    //     if (!rst_n) begin
+    //         mm_start_o <= 0;
+    //     end else begin
+    //         case (state)
+    //             LOAD: begin
+    //                 if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
+    //                     mm_start_o <= 1;
                     
-                    // buffer B - handshake && id
-                    // if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
-                    //     buf_b_addr <= buf_b_addr;
-                    // end
+    //             end
 
-                    // if (count_b == 3) begin
-                    //     buf_b_wren_o <= 1;
-                    // end
-
-                    // if (buf_b_wren_o)
-                    //     buf_b_addr <= buf_b_addr + 1;
-                    
-                    if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
-                        mm_start_o <= 1;
-                    
-                end
-
-                // WRITE_C: begin
-                //     buf_a_addr <= 0;
-                //     buf_b_addr <= 0;
-                // end
-            endcase
-        end
-        // $display("state: %d, state_n: %d\n", state, state_n);
+    //         endcase
+    //     end
+    //     // $display("state: %d, state_n: %d\n", state, state_n);
         
-        // $display("rready: %d, rvalid: %d, rid: %d, rdata: %h\n", axi_r_if.rready, axi_r_if.rvalid, axi_r_if.rid, axi_r_if.rdata);
+    //     // $display("rready: %d, rvalid: %d, rid: %d, rdata: %h\n", axi_r_if.rready, axi_r_if.rvalid, axi_r_if.rid, axi_r_if.rdata);
 
-        // LOAD 
-        // $display("arvalid: %d, arlen: %d, arsize: %d, arburst: %d, araddr: %d, arready: %d\n", axi_ar_if.arvalid, axi_ar_if.arlen, axi_ar_if.arsize, axi_ar_if.arburst, axi_ar_if.araddr, axi_ar_if.arready);
-        // $display("buf_a_addr: %d, buf_b_addr: %d, count_a: %d, count_b: %d, buf_a_wren_o: %d, buf_b_wren_o: %d, buf_a_data: %h, buf_b_data: %h\n", buf_a_addr, buf_b_addr, count_a, count_b, buf_a_wren_o, buf_b_wren_o, buf_a_data, buf_b_data);   
-        // $display("mm_start_o: %d, mm_done_i: %d\n", mm_start_o, mm_done_i);
+    //     // LOAD 
+    //     // $display("arvalid: %d, arlen: %d, arsize: %d, arburst: %d, araddr: %d, arready: %d\n", axi_ar_if.arvalid, axi_ar_if.arlen, axi_ar_if.arsize, axi_ar_if.arburst, axi_ar_if.araddr, axi_ar_if.arready);
+    //     // $display("buf_a_addr: %d, buf_b_addr: %d, count_a: %d, count_b: %d, buf_a_wren_o: %d, buf_b_wren_o: %d, buf_a_data: %h, buf_b_data: %h\n", buf_a_addr, buf_b_addr, count_a, count_b, buf_a_wren_o, buf_b_wren_o, buf_a_data, buf_b_data);   
+    //     // $display("mm_start_o: %d, mm_done_i: %d\n", mm_start_o, mm_done_i);
 
-        // ADDR_C
-        // $display("awvalid: %d, awlen: %d, awsize: %d, awburst: %d, awaddr: %d, awready: %d\n", axi_aw_if.awvalid, axi_aw_if.awlen, axi_aw_if.awsize, axi_aw_if.awburst, axi_aw_if.awaddr, axi_aw_if.awready);
+    //     // ADDR_C
+    //     // $display("awvalid: %d, awlen: %d, awsize: %d, awburst: %d, awaddr: %d, awready: %d\n", axi_aw_if.awvalid, axi_aw_if.awlen, axi_aw_if.awsize, axi_aw_if.awburst, axi_aw_if.awaddr, axi_aw_if.awready);
 
-        // WRITE_C 
-        // $display("count_c: %d, wready: %d, wvalid: %d, wdata: %h\n", count_c, axi_w_if.wready, axi_w_if.wvalid, axi_w_if.wdata);
-    end
+    //     // WRITE_C 
+    //     // $display("count_c: %d, wready: %d, wvalid: %d, wdata: %h\n", count_c, axi_w_if.wready, axi_w_if.wvalid, axi_w_if.wdata);
+    // end
 
     assign buf_a_waddr_o = buf_a_addr;
     assign buf_b_waddr_o = buf_b_addr;
