@@ -109,6 +109,7 @@ module DMA_ENGINE
         done_o = 1;
         buf_a_wbyteenable_o = 'hffff;
         buf_b_wbyteenable_o = 'hffff;
+        buf_a_wren_o = 0; buf_b_wren_o = 0;
 
         case (state)
             IDLE: begin
@@ -170,6 +171,7 @@ module DMA_ENGINE
 
                 if (count_a == 3) begin
                     count_a_n = 0;
+                    buf_a_wren_o = 1;
                 end
 
                 if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
@@ -178,6 +180,7 @@ module DMA_ENGINE
 
                 if (count_b == 3) begin
                     count_b_n = 0;
+                    buf_b_wren_o = 1;
                 end
 
 
@@ -274,10 +277,6 @@ module DMA_ENGINE
                         buf_a_data <= (buf_a_data << 32) | axi_r_if.rdata;
                     end
 
-                    if (count_a == 3) begin
-                        buf_a_wren_o <= 1;
-                    end
-
                     if (buf_a_wren_o)
                         buf_a_addr <= buf_a_addr + 1;
                     
@@ -285,10 +284,6 @@ module DMA_ENGINE
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
                         buf_b_addr <= buf_b_addr;
                         buf_b_data <= (buf_b_data << 32) | axi_r_if.rdata;
-                    end
-
-                    if (count_b == 3) begin
-                        buf_b_wren_o <= 1;
                     end
 
                     if (buf_b_wren_o)
