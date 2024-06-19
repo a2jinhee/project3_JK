@@ -113,9 +113,10 @@ module DMA_ENGINE
                 axi_ar_if.arid = 0; 
                 axi_ar_if.araddr = mat_a_addr_i + (burst_a * 64); 
 
-                if (axi_ar_if.arready)
+                if (axi_ar_if.arready) begin
                     axi_ar_if.arvalid = 0; 
                     burst_a = burst_a + 1;
+                end
                 else
                     state_n = ADDR_A;
 
@@ -131,9 +132,10 @@ module DMA_ENGINE
                 axi_ar_if.arid = 1;
                 axi_ar_if.araddr = mat_b_addr_i + (burst_b * 64); 
 
-                if (axi_ar_if.arready)
+                if (axi_ar_if.arready) begin
                     axi_ar_if.arvalid = 0; 
                     burst_b = burst_b + 1;
+                end
                 else
                     state_n = ADDR_B;
 
