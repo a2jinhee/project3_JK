@@ -47,13 +47,6 @@ module DMA_ENGINE
 
     // TODO: implement me
 
-    // Read matrix A from memory and store into buffer A
-    // Read matrix B from memory and store into buffer B
-    // To hide DRAM latency, read matrix A and B in parallel
-    // Generate single-pulse start command to MM_ENGINE
-    // Wait for the done signal from MM_ENGINE to be 1
-    // Read output matrix C from MM_ENGINE and write to memory
-
     // FSM states
     localparam  IDLE        = 3'b000,
                 ADDR_A      = 3'b001,
@@ -70,6 +63,13 @@ module DMA_ENGINE
     reg [3:0] burst_a, burst_b; 
 
 
+    // Read matrix A from memory and store into buffer A
+    // Read matrix B from memory and store into buffer B
+    // To hide DRAM latency, read matrix A and B in parallel
+    // Generate single-pulse start command to MM_ENGINE
+    // Wait for the done signal from MM_ENGINE to be 1
+    // Read output matrix C from MM_ENGINE and write to memory
+
     always_ff @(posedge clk)
         if (!rst_n)
             state <= IDLE;
@@ -78,24 +78,23 @@ module DMA_ENGINE
         
     always_comb begin 
         state_n = state;
-        axi_ar_if.arlen = 15;
-        axi_ar_if.arsize = 4;
-        axi_ar_if.arburst = 1;
-        axi_ar_if.arid = 0;
-        axi_ar_if.arvalid = 0;
-        axi_aw_if.awvalid = 0;
-        axi_aw_if.awlen = 15;
-        axi_aw_if.awsize = 4;
-        axi_aw_if.awburst = 1;
-        axi_aw_if.awid = 0;
-        axi_w_if.wvalid = 0;
-        axi_w_if.wlast = 0;
-        axi_w_if.wid = 0;
-        axi_w_if.wstrb = 'hf;
+        // AXI interface AR channel
+        axi_ar_if.arlen = 15; axi_ar_if.arsize = 4; axi_ar_if.arburst = 1;
+        axi_ar_if.arid = 0; axi_ar_if.arvalid = 0;
+
+        // AXI interface AW channel
+        axi_aw_if.awvalid = 0; axi_aw_if.awlen = 15; axi_aw_if.awsize = 4;
+        axi_aw_if.awburst = 1; axi_aw_if.awid = 0;
+
+        // AXI interface W channel
+        axi_w_if.wvalid = 0; axi_w_if.wlast = 0; axi_w_if.wid = 0; axi_w_if.wstrb = 'hf;
+
+        // AXI interface B channel
         axi_b_if.bready = 0;
+
+        // AXI interface R channel
         axi_r_if.rready = 0;
         done_o = 1;
-
 
         case (state)
             IDLE: begin
@@ -183,21 +182,17 @@ module DMA_ENGINE
                 // - output: bready
                 // - input: bvalid, bid, bresp
                 done_o = 0;
-
                 axi_w_if.wvalid = 1;
-                
-
                 axi_b_if.bready = 1;
 
                 if (axi_w_if.wready && axi_w_if.wvalid) begin
                     axi_w_if.wdata = accum_i[count_c / 4][count_c % 4];
                 end
 
-                if (count_c == 15)
-                    axi_w_if.wlast = 1;
-                else
-                    axi_w_if.wlast = 0;
+                // send last signal on last write
+                axi_w_if.wlast = (count_c == 15) ? 1 : 0;
 
+                // B channel handshake
                 if (axi_b_if.bready & axi_b_if.bvalid) begin
                     done_o = 1;
                 end 
@@ -215,7 +210,6 @@ module DMA_ENGINE
         buf_a_wren_o <= 0;
         buf_b_wren_o <= 0;
         mm_start_o <= 0;
-        // done_o <= 0; 
 
         if (!rst_n) begin
 
@@ -235,18 +229,20 @@ module DMA_ENGINE
             case (state)
 
                 ADDR_A: begin
-                    if (axi_ar_if.arready) begin
+                    if (axi_ar_if.arready)
                         burst_a <= burst_a + 1;
-                    end
                 end
 
                 ADDR_B: begin
-                    if (axi_ar_if.arready) begin
+                    if (axi_ar_if.arready)
                         burst_b <= burst_b + 1;
-                    end
                 end
 
-                LOAD: begin                    
+                LOAD: begin
+                    // Write mem data to buffer when handshake && id (A if id==0, B if id==1)
+                    // reset count every 128b=16B (burst is 4B*16=64B)
+                    // set buffer write enable to 1 every 128b=16B
+
                     // buffer A - handshake && id
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
                         buf_a_wbyteenable_o <= 'hffff;
@@ -278,7 +274,7 @@ module DMA_ENGINE
 
                     if (buf_b_wren_o)
                         buf_b_addr <= buf_b_addr + 1;
-
+                    
                     if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
                         mm_start_o <= 1;
                     
@@ -287,6 +283,7 @@ module DMA_ENGINE
                 WRITE_C: begin
                     buf_a_addr <= 0;
                     buf_b_addr <= 0;
+                    // update counter when handshake
                     if (axi_w_if.wready && axi_w_if.wvalid) begin
                         count_c <= count_c + 1;
                     end
@@ -296,10 +293,9 @@ module DMA_ENGINE
                         burst_a <= 0; 
                         burst_b <= 0;
                     end
-
-                    // if (axi_b_if.bready && axi_b_if.bvalid) begin
+                    // don't update down here. 
+                    // if (axi_b_if.bready && axi_b_if.bvalid)
                     //     done_o <= 1;
-                    // end
                 end
             endcase
         end
@@ -317,8 +313,6 @@ module DMA_ENGINE
 
         // WRITE_C 
         // $display("count_c: %d, wready: %d, wvalid: %d, wdata: %h\n", count_c, axi_w_if.wready, axi_w_if.wvalid, axi_w_if.wdata);
-
-
     end
 
     assign buf_a_waddr_o = buf_a_addr;
