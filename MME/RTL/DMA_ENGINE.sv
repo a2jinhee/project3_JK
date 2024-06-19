@@ -59,8 +59,8 @@ module DMA_ENGINE
     reg [2:0] state, state_n;
     reg [BUF_DW-1:0] buf_a_data, buf_b_data;
     reg [BUF_AW-1:0] buf_a_addr, buf_b_addr;
-    reg [2:0] count_a, count_b;
-    reg [4:0] count_c; 
+    reg [1:0] count_a, count_b;
+    reg [3:0] count_c; 
     reg [3:0] burst_a, burst_b; 
 
     // Read matrix A from memory and store into buffer A
