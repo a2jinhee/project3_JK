@@ -63,7 +63,6 @@ module DMA_ENGINE
     reg [4:0] count_c, count_c_n; 
     reg [1:0] burst_a, burst_b; 
     reg [1:0] burst_a_n, burst_b_n;
-    reg mm_start; 
 
     // Read matrix A from memory and store into buffer A
     // Read matrix B from memory and store into buffer B
@@ -161,10 +160,10 @@ module DMA_ENGINE
                 axi_r_if.rready = 1;
                 if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
                     state_n = WAIT_MM;
-                    mm_start = 1; 
             end
             WAIT_MM: begin
                 done_o = 0;
+                mm_start_o = 1; 
                 if (mm_start_o)
                     state_n = WAIT_MM;
 
@@ -301,8 +300,6 @@ module DMA_ENGINE
         // WRITE_C 
         // $display("count_c: %d, wready: %d, wvalid: %d, wdata: %h\n", count_c, axi_w_if.wready, axi_w_if.wvalid, axi_w_if.wdata);
     end
-
-    assign m_start_o = mm_start;
 
     assign buf_a_waddr_o = buf_a_addr;
     assign buf_a_wdata_o = buf_a_data;
