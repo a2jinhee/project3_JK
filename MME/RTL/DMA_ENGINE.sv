@@ -120,6 +120,11 @@ always_comb begin
 
     buf_a_wren_o = 0; buf_b_wren_o = 0;
 
+    // solve latch issues
+    axi_ar_if.araddr = 0;
+    buf_a_data = 0; 
+    buf_b_data = 0; 
+
     case (state)
         IDLE: begin
             if (start_i) begin
