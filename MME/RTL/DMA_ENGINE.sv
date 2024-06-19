@@ -63,7 +63,7 @@ module DMA_ENGINE
     reg [4:0] count_c, count_c_n; 
     reg [1:0] burst_a, burst_b; 
     reg [1:0] burst_a_n, burst_b_n;
-    wire mm_start; 
+    reg mm_start; 
 
     // Read matrix A from memory and store into buffer A
     // Read matrix B from memory and store into buffer B
