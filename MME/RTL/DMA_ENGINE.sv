@@ -166,7 +166,7 @@ always_comb begin
             else
                 state_n = ADDR_B;
 
-            if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_b_n == (mat_width_i / 4 - 1))
+            if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_b == (mat_width_i / 4 - 1))
                 state_n = LOAD;
         end
         LOAD: begin
@@ -200,9 +200,10 @@ always_comb begin
             end
 
             if (axi_r_if.rlast) begin
-                if ((buf_a_addr_n == mat_width_i) && (buf_b_addr_n == mat_width_i))
+                if ((buf_a_addr_n == mat_width_i) && (buf_b_addr_n == mat_width_i)) begin
                     state_n = WAIT_MM;
                     mm_start_o = 1; 
+                end
             end
                 
         end
