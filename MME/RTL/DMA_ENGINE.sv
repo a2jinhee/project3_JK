@@ -192,8 +192,7 @@ module DMA_ENGINE
                 if (axi_aw_if.awready)
                     axi_aw_if.awvalid = 0; 
 
-                if (!axi_aw_if.awvalid && axi_aw_if.awready)
-                
+                if (!axi_aw_if.awvalid && axi_aw_if.awready) begin
                     axi_w_if.wvalid = 1;
                     axi_b_if.bready = 1;
 
@@ -209,6 +208,7 @@ module DMA_ENGINE
                         done_o = 1;
                         state_n = IDLE;
                     end 
+                end
             end
 
         endcase
