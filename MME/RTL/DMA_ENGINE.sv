@@ -99,7 +99,6 @@ module DMA_ENGINE
         case (state)
             IDLE: begin
                 if (start_i) begin
-                    burst_a = 0; burst_b = 0;
                     done_o = 0;
                     state_n = ADDR_A;
                 end
@@ -110,6 +109,8 @@ module DMA_ENGINE
                 // - output: arvalid, arid, araddr, arlen, arsize, arburst
                 // - input: arready
                 done_o = 0;
+                if axi_ar_if.araddr==0
+                    burst_a = 0;
                 axi_ar_if.arvalid = 1;
                 axi_ar_if.arid = 0; 
                 axi_ar_if.araddr = mat_a_addr_i + (burst_a * 64); 
