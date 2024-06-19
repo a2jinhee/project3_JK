@@ -57,7 +57,8 @@ localparam  IDLE        = 3'b000,
             WRITE_C     = 3'b110;
 
 reg [2:0] state, state_n;
-reg [BUF_DW-1:0] buf_a_data, buf_b_data, buf_a_data_n, buf_b_data_n;
+reg [BUF_DW-1:0] buf_a_data, buf_b_data; 
+// reg [BUF_DW-1:0] buf_a_data_n, buf_b_data_n;
 reg [BUF_AW-1:0] buf_a_addr, buf_b_addr, buf_a_addr_n, buf_b_addr_n;
 reg [2:0] count_a, count_b, count_a_n, count_b_n;
 reg [4:0] count_c, count_c_n;
@@ -77,14 +78,14 @@ always_ff @(posedge clk)
         burst_a <= 0; burst_b <= 0;
         count_c <= 0;
         count_a <= 0; count_b <= 0;
-        buf_a_data <= 0; buf_b_data <= 0;
+        // buf_a_data <= 0; buf_b_data <= 0;
         buf_a_addr <= 0; buf_b_addr <= 0;
     end else begin
         state <= state_n;
         burst_a <= burst_a_n; burst_b <= burst_b_n;
         count_c <= count_c_n;
         count_a <= count_a_n; count_b <= count_b_n;
-        buf_a_data <= buf_a_data_n; buf_b_data <= buf_b_data_n;
+        // buf_a_data <= buf_a_data_n; buf_b_data <= buf_b_data_n;
         buf_a_addr <= buf_a_addr_n; buf_b_addr <= buf_b_addr_n;
     end
     
@@ -93,7 +94,7 @@ always_comb begin
     burst_a_n = burst_a; burst_b_n = burst_b;
     count_c_n = count_c;
     count_a_n = count_a; count_b_n = count_b;
-    buf_a_data_n = buf_a_data; buf_b_data_n = buf_b_data;
+    // buf_a_data_n = buf_a_data; buf_b_data_n = buf_b_data;
     buf_a_addr_n = buf_a_addr; buf_b_addr_n = buf_b_addr;
     
     // AXI interface AR channel
@@ -178,7 +179,7 @@ always_comb begin
             axi_r_if.rready = 1;
 
             if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
-                buf_a_data_n = (buf_a_data << 32) | axi_r_if.rdata;
+                buf_a_data[{~count_a[1:0], 5'b0}+:32] = axi_r_if.rdata;
                 count_a_n = count_a + 1;
             end
 
@@ -189,7 +190,7 @@ always_comb begin
             end
 
             if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
-                buf_b_data_n = (buf_b_data << 32) | axi_r_if.rdata;
+                buf_b_data[{~count_b[1:0], 5'b0}+:32] = axi_r_if.rdata;
                 count_b_n = count_b + 1;
             end
 
@@ -275,43 +276,11 @@ always_comb begin
     endcase
 end
 
-// // Counters and addresses
-// always @(posedge clk) begin
-
-//     mm_start_o <= 0;
-
-//     if (!rst_n) begin
-//         mm_start_o <= 0;
-//     end else begin
-//         case (state)
-//             LOAD: begin
-//                 if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
-//                     mm_start_o <= 1;
-//             end
-
-//         endcase
-//     end
-//     // $display("state: %d, state_n: %d\n", state, state_n);
-    
-//     // $display("rready: %d, rvalid: %d, rid: %d, rdata: %h\n", axi_r_if.rready, axi_r_if.rvalid, axi_r_if.rid, axi_r_if.rdata);
-
-//     // LOAD
-//     // $display("arvalid: %d, arlen: %d, arsize: %d, arburst: %d, araddr: %d, arready: %d\n", axi_ar_if.arvalid, axi_ar_if.arlen, axi_ar_if.arsize, axi_ar_if.arburst, axi_ar_if.araddr, axi_ar_if.arready);
-//     // $display("buf_a_addr: %d, buf_b_addr: %d, count_a: %d, count_b: %d, buf_a_wren_o: %d, buf_b_wren_o: %d, buf_a_data: %h, buf_b_data: %h\n", buf_a_addr, buf_b_addr, count_a, count_b, buf_a_wren_o, buf_b_wren_o, buf_a_data, buf_b_data);   
-//     // $display("mm_start_o: %d, mm_done_i: %d\n", mm_start_o, mm_done_i);
-
-//     // ADDR_C
-//     // $display("awvalid: %d, awlen: %d, awsize: %d, awburst: %d, awaddr: %d, awready: %d\n", axi_aw_if.awvalid, axi_aw_if.awlen, axi_aw_if.awsize, axi_aw_if.awburst, axi_aw_if.awaddr, axi_aw_if.awready);
-
-//     // WRITE_C
-//     // $display("count_c: %d, wready: %d, wvalid: %d, wdata: %h\n", count_c, axi_w_if.wready, axi_w_if.wvalid, axi_w_if.wdata);
-// end
-
 assign buf_a_waddr_o = buf_a_addr;
 assign buf_b_waddr_o = buf_b_addr;
 
-assign buf_a_wdata_o = buf_a_data_n;
-assign buf_b_wdata_o = buf_b_data_n;
+assign buf_a_wdata_o = buf_a_data;
+assign buf_b_wdata_o = buf_b_data;
 
 
 
