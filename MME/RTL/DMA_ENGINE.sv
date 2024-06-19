@@ -95,6 +95,7 @@ module DMA_ENGINE
         // AXI interface R channel
         axi_r_if.rready = 0;
         done_o = 1;
+        burst_a = 0; burst_b = 0;   
 
         case (state)
             IDLE: begin
