@@ -191,27 +191,24 @@ module DMA_ENGINE
 
                 if (axi_aw_if.awready)
                     axi_aw_if.awvalid = 0; 
-                else
-                    state_n = ADDR_C;
 
                 if (!axi_aw_if.awvalid && axi_aw_if.awready)
-                    state_n = WRITE_C;
                 
-                axi_w_if.wvalid = 1;
-                axi_b_if.bready = 1;
+                    axi_w_if.wvalid = 1;
+                    axi_b_if.bready = 1;
 
-                if (axi_w_if.wready && axi_w_if.wvalid) begin
-                    axi_w_if.wdata = accum_i[count_c / 4][count_c % 4];
-                end
+                    if (axi_w_if.wready && axi_w_if.wvalid) begin
+                        axi_w_if.wdata = accum_i[count_c / 4][count_c % 4];
+                    end
 
-                // send last signal on last write
-                axi_w_if.wlast = (count_c == 15) ? 1 : 0;
+                    // send last signal on last write
+                    axi_w_if.wlast = (count_c == 15) ? 1 : 0;
 
-                // B channel handshake
-                if (axi_b_if.bready & axi_b_if.bvalid) begin
-                    done_o = 1;
-                    state_n = IDLE;
-                end 
+                    // B channel handshake
+                    if (axi_b_if.bready & axi_b_if.bvalid) begin
+                        done_o = 1;
+                        state_n = IDLE;
+                    end 
             end
 
         endcase
