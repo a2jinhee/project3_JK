@@ -83,13 +83,6 @@ module DMA_ENGINE
     always_comb begin 
         state_n = state;
         burst_a_n = burst_a; burst_b_n = burst_b;
-        // AXI interface AR channel
-        axi_ar_if.arlen = 15; axi_ar_if.arsize = 4; axi_ar_if.arburst = 1;
-        axi_ar_if.arid = 0; axi_ar_if.arvalid = 0;
-
-        // AXI interface AW channel
-        axi_aw_if.awvalid = 0; axi_aw_if.awlen = 15; axi_aw_if.awsize = 4;
-        axi_aw_if.awburst = 1; axi_aw_if.awid = 0;
 
         // AXI interface W channel
         axi_w_if.wvalid = 0; axi_w_if.wlast = 0; axi_w_if.wid = 0; axi_w_if.wstrb = 'hf;
