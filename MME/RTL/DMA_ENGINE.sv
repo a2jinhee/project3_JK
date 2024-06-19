@@ -63,7 +63,6 @@ module DMA_ENGINE
     reg [4:0] count_c; 
     reg [3:0] burst_a, burst_b; 
 
-
     // Read matrix A from memory and store into buffer A
     // Read matrix B from memory and store into buffer B
     // To hide DRAM latency, read matrix A and B in parallel
@@ -196,10 +195,8 @@ module DMA_ENGINE
                 // B channel handshake
                 if (axi_b_if.bready & axi_b_if.bvalid) begin
                     done_o = 1;
-                end 
-
-                if (done_o)
                     state_n = IDLE;
+                end 
             end
 
         endcase
