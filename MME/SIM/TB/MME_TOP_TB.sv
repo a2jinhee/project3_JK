@@ -33,7 +33,7 @@ module MME_TOP_TB ();
     initial begin
         rst_n                   = 1'b0;     // active at time 0
 
-        repeat (10) @(posedge clk);          // after 3 cycles,
+        repeat (1) @(posedge clk);          // after 3 cycles,
         rst_n                   = 1'b1;     // release the reset
     end
 
@@ -112,7 +112,7 @@ module MME_TOP_TB ();
         apb_if.init();
 
         @(posedge rst_n);                   // wait for a release of the reset
-        repeat (10) @(posedge clk);         // wait another 10 cycles
+        repeat (1) @(posedge clk);         // wait another 10 cycles
 
         apb_if.read(`OFFSET_IP_VER, data);
         $display("---------------------------------------------------");
@@ -196,7 +196,7 @@ module MME_TOP_TB ();
         data = 0;
         while (data!=1) begin
             apb_if.read(`OFFSET_MME_STATUS, data);
-            repeat (100) @(posedge clk);
+            repeat (1) @(posedge clk);
             $display("Waiting for a MM completion");
         end
         @(posedge clk);
