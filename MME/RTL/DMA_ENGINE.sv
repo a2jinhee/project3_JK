@@ -236,6 +236,8 @@ module DMA_ENGINE
                 // B CHANNEL
                 // - output: bready
                 // - input: bvalid, bid, bresp
+                buf_a_addr = 0; 
+                buf_b_addr = 0;
                 done_o = 0;
                 axi_w_if.wvalid = 1;
                 axi_b_if.bready = 1;
@@ -315,10 +317,10 @@ module DMA_ENGINE
                     
                 end
 
-                WRITE_C: begin
-                    buf_a_addr <= 0;
-                    buf_b_addr <= 0;
-                end
+                // WRITE_C: begin
+                //     buf_a_addr <= 0;
+                //     buf_b_addr <= 0;
+                // end
             endcase
         end
         // $display("state: %d, state_n: %d\n", state, state_n);
