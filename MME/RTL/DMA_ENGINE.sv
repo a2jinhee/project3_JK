@@ -82,7 +82,7 @@ module DMA_ENGINE
             count_c <= count_c_n;
         end
         
-    always_comb begin 
+    always @(*) begin
         state_n = state;
         burst_a_n = burst_a; burst_b_n = burst_b;
         count_c_n = count_c;
@@ -104,6 +104,7 @@ module DMA_ENGINE
         // AXI interface R channel
         axi_r_if.rready = 0;
         done_o = 1;
+        mm_start_o 	= 1'b0;
 
         case (state)
             IDLE: begin
@@ -160,10 +161,11 @@ module DMA_ENGINE
                 axi_r_if.rready = 1;
                 if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
                     state_n = WAIT_MM;
+                    mm_start_o = 1'b1; 
             end
             WAIT_MM: begin
                 done_o = 0;
-                mm_start_o = 1; 
+                
                 if (mm_start_o)
                     state_n = WAIT_MM;
 
