@@ -99,6 +99,7 @@ module DMA_ENGINE
         case (state)
             IDLE: begin
                 if (start_i) begin
+                    burst_a = 0; burst_b = 0;
                     done_o = 0;
                     state_n = ADDR_A;
                 end
