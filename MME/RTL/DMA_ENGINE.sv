@@ -235,7 +235,7 @@ module DMA_ENGINE
 
             buf_a_addr <= 0; buf_b_addr <= 0;
             buf_a_data <= 0; buf_b_data <= 0;
-            count_a <= 0; count_b <= 0; count_c <= 0;
+            count_a <= 0; count_b <= 0;
             mm_start_o <= 0;
 
         end else begin
