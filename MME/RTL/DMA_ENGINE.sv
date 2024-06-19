@@ -101,6 +101,7 @@ module DMA_ENGINE
                 if (start_i) begin
                     done_o = 0;
                     state_n = ADDR_A;
+                    burst_a = 0; burst_b = 0;
                 end
             
             end
@@ -198,7 +199,6 @@ module DMA_ENGINE
             buf_a_addr <= 0; buf_b_addr <= 0;
             buf_a_data <= 0; buf_b_data <= 0;
             count_a <= 0; count_b <= 0; count_c <= 0;
-            burst_a <= 0; burst_b <= 0;
             mm_start_o <= 0;
 
         end else begin
@@ -256,8 +256,6 @@ module DMA_ENGINE
 
                     if (count_c == 15) begin
                         count_c <= 0; 
-                        burst_a <= 0; 
-                        burst_b <= 0;
                     end
                     // don't update done here. 
                     // if (axi_b_if.bready && axi_b_if.bvalid)
