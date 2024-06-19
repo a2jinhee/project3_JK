@@ -53,9 +53,8 @@ module DMA_ENGINE
                 ADDR_B      = 3'b010,
                 LOAD        = 3'b011,
                 WAIT_MM     = 3'b100,
-                // ADDR_C      = 3'b101,
-                // WRITE_C     = 3'b110;
-                WRITE_C     = 3'b101;
+                ADDR_C      = 3'b101,
+                WRITE_C     = 3'b110;
 
     reg [2:0] state, state_n;
     reg [BUF_DW-1:0] buf_a_data, buf_b_data;
@@ -154,33 +153,10 @@ module DMA_ENGINE
                     state_n = WAIT_MM;
 
                 if (mm_done_i && !mm_start_o)
-                    state_n = WRITE_C;
+                    state_n = ADDR_C;
                 
             end
-            // ADDR_C: begin
-            //     // AW CHANNEL
-            //     // - output: awvalid, awid, awaddr, awlen, awsize, awburst
-            //     // - input: awready
-            //     done_o = 0;
-            //     axi_aw_if.awvalid = 1;
-                
-            //     axi_aw_if.awaddr = mat_c_addr_i; 
-
-            //     if (axi_aw_if.awready)
-            //         axi_aw_if.awvalid = 0; 
-            //     else
-            //         state_n = ADDR_C;
-
-            //     if (!axi_aw_if.awvalid && axi_aw_if.awready)
-            //         state_n = WRITE_C;
-            // end
-            WRITE_C: begin
-                // W CHANNEL
-                // - output: wvalid, wid, wdata, wlast
-                // - input: wready
-                // B CHANNEL
-                // - output: bready
-                // - input: bvalid, bid, bresp
+            ADDR_C: begin
                 // AW CHANNEL
                 // - output: awvalid, awid, awaddr, awlen, awsize, awburst
                 // - input: awready
@@ -191,26 +167,36 @@ module DMA_ENGINE
 
                 if (axi_aw_if.awready)
                     axi_aw_if.awvalid = 0; 
+                else
+                    state_n = ADDR_C;
 
-                if (!axi_aw_if.awvalid && axi_aw_if.awready) begin
-                    axi_w_if.wvalid = 1;
-                    axi_b_if.bready = 1;
-
-                    if (axi_w_if.wready && axi_w_if.wvalid) begin
-                        axi_w_if.wdata = accum_i[count_c / 4][count_c % 4];
-                    end
-
-                    // send last signal on last write
-                    axi_w_if.wlast = (count_c == 15) ? 1 : 0;
-
-                    // B channel handshake
-                    if (axi_b_if.bready & axi_b_if.bvalid) begin
-                        done_o = 1;
-                        state_n = IDLE;
-                    end 
-                end
+                if (!axi_aw_if.awvalid && axi_aw_if.awready)
+                    state_n = WRITE_C;
             end
+            WRITE_C: begin
+                // W CHANNEL
+                // - output: wvalid, wid, wdata, wlast
+                // - input: wready
+                // B CHANNEL
+                // - output: bready
+                // - input: bvalid, bid, bresp
+                done_o = 0;
+                axi_w_if.wvalid = 1;
+                axi_b_if.bready = 1;
 
+                if (axi_w_if.wready && axi_w_if.wvalid) begin
+                    axi_w_if.wdata = accum_i[count_c / 4][count_c % 4];
+                end
+
+                // send last signal on last write
+                axi_w_if.wlast = (count_c == 15) ? 1 : 0;
+
+                // B channel handshake
+                if (axi_b_if.bready & axi_b_if.bvalid) begin
+                    done_o = 1;
+                    state_n = IDLE;
+                end 
+            end
         endcase
     end
 
@@ -256,12 +242,10 @@ module DMA_ENGINE
 
                     if (count_a == 3) begin
                         buf_a_wren_o <= 1;
+                        buf_a_addr <= buf_a_addr + 1;
                         count_a <= 0;
                     end
 
-                    if (buf_a_wren_o)
-                        buf_a_addr <= buf_a_addr + 1;
-                    
                     // buffer B - handshake && id
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
                         buf_b_wbyteenable_o <= 'hffff;
@@ -272,15 +256,12 @@ module DMA_ENGINE
 
                     if (count_b == 3) begin
                         buf_b_wren_o <= 1;
+                        buf_b_addr <= buf_b_addr + 1;
                         count_b <= 0;
                     end
-
-                    if (buf_b_wren_o)
-                        buf_b_addr <= buf_b_addr + 1;
                     
                     if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
                         mm_start_o <= 1;
-                    
                 end
 
                 WRITE_C: begin
