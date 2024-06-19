@@ -72,12 +72,13 @@ module DMA_ENGINE
     // Read output matrix C from MM_ENGINE and write to memory
 
     always_ff @(posedge clk)
-        if (!rst_n)
+        if (!rst_n) begin
             state <= IDLE;
             burst_a <= 0; burst_b <= 0;
-        else
+        end else begin
             state <= state_n;
             burst_a <= burst_a_n; burst_b <= burst_b_n;
+        end
         
     always_comb begin 
         state_n = state;
