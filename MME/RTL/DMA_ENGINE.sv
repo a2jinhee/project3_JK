@@ -235,9 +235,15 @@ module DMA_ENGINE
                     // set buffer write enable to 1 every 128b=16B
 
                     // buffer A - handshake && id
-                    if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
-                        buf_a_data <= (buf_a_data << 32) | axi_r_if.rdata;
-                        count_a <= count_a + 1;
+                    if (axi_r_if.rready && axi_r_if.rvalid) begin
+                        if (axi_r_if.rid == 0) begin
+                            buf_a_data <= (buf_a_data << 32) | axi_r_if.rdata;
+                            count_a <= count_a + 1;
+                        end
+                        else if (axi_r_if.rid == 1) begin
+                            buf_b_data <= (buf_b_data << 32) | axi_r_if.rdata;
+                            count_b <= count_b + 1;
+                        end
                     end
 
                     if (count_a == 3) begin
@@ -248,12 +254,6 @@ module DMA_ENGINE
                     if (buf_a_wren_o)
                         buf_a_addr <= buf_a_addr + 1;
                     
-                    // buffer B - handshake && id
-                    if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
-                        buf_b_data <= (buf_b_data << 32) | axi_r_if.rdata;
-                        count_b <= count_b + 1;
-                    end
-
                     if (count_b == 3) begin
                         buf_b_wren_o <= 1;
                         count_b <= 0;
