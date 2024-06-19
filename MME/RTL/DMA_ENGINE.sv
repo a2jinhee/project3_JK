@@ -340,8 +340,8 @@ module DMA_ENGINE
         // $display("count_c: %d, wready: %d, wvalid: %d, wdata: %h\n", count_c, axi_w_if.wready, axi_w_if.wvalid, axi_w_if.wdata);
     end
 
-    assign buf_a_waddr_o = buf_a_addr;
-    assign buf_b_waddr_o = buf_b_addr;
+    assign buf_a_waddr_o = buf_a_addr_n;
+    assign buf_b_waddr_o = buf_b_addr_n;
 
     assign buf_a_wdata_o = buf_a_data;
     assign buf_b_wdata_o = buf_b_data;
