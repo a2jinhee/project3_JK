@@ -169,10 +169,10 @@ module DMA_ENGINE
             end
             WAIT_MM: begin
                 done_o = 0;
-                if (mm_start_n)
+                if (mm_start)
                     state_n = WAIT_MM;
 
-                if (mm_done_i && !mm_start_n)
+                if (mm_done_i && !mm_start)
                     state_n = ADDR_C;
                 
             end
