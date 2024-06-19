@@ -173,8 +173,7 @@ module DMA_ENGINE
                 axi_r_if.rready = 1;
 
                 if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
-                    buf_a_addr_n <= buf_a_addr;
-                    buf_a_data_n <= (buf_a_data << 32) | axi_r_if.rdata;
+                    buf_a_data_n = (buf_a_data << 32) | axi_r_if.rdata;
                     count_a_n = count_a + 1;
                 end
 
@@ -187,8 +186,7 @@ module DMA_ENGINE
                     buf_a_addr_n = buf_a_addr + 1;
 
                 if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
-                    buf_b_addr_n <= buf_b_addr;
-                    buf_b_data_n <= (buf_b_data << 32) | axi_r_if.rdata;
+                    buf_b_data_n = (buf_b_data << 32) | axi_r_if.rdata;
                     count_b_n = count_b + 1;
                 end
 
