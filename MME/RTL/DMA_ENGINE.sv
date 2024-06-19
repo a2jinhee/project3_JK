@@ -57,13 +57,12 @@ module DMA_ENGINE
                 WRITE_C     = 3'b110;
 
     reg [2:0] state, state_n;
-    reg [BUF_DW-1:0] buf_a_data, buf_b_data;
-    reg [BUF_AW-1:0] buf_a_addr, buf_b_addr;
-    reg [2:0] count_a, count_b;
+    reg [BUF_DW-1:0] buf_a_data, buf_b_data; buf_a_data_n; buf_b_data_n;
+    reg [BUF_AW-1:0] buf_a_addr, buf_b_addr; buf_a_addr_n, buf_b_addr_n;
+    reg [2:0] count_a, count_b; count_a_n; count_b_n;
     reg [4:0] count_c, count_c_n; 
     reg [1:0] burst_a, burst_b; 
     reg [1:0] burst_a_n, burst_b_n;
-    reg mm_start, mm_start_n; 
 
     // Read matrix A from memory and store into buffer A
     // Read matrix B from memory and store into buffer B
@@ -77,19 +76,25 @@ module DMA_ENGINE
             state <= IDLE;
             burst_a <= 0; burst_b <= 0;
             count_c <= 0;
-            mm_start <= 0;
+            buf_a_data <= 0; buf_b_data <= 0;
+            buf_a_addr <= 0; buf_b_addr <= 0;
+            count_a <= 0; count_b <= 0;
         end else begin
             state <= state_n;
             burst_a <= burst_a_n; burst_b <= burst_b_n;
             count_c <= count_c_n;
-            mm_start <= mm_start_n;
+            buf_a_data <= buf_a_data_n; buf_b_data <= buf_b_data_n;
+            buf_a_addr <= buf_a_addr_n; buf_b_addr <= buf_b_addr_n;
+            count_a <= count_a_n; count_b <= count_b_n;
         end
         
     always_comb begin 
         state_n = state;
         burst_a_n = burst_a; burst_b_n = burst_b;
         count_c_n = count_c;
-        mm_start_n = mm_start;
+        buf_a_data_n = buf_a_data; buf_b_data_n = buf_b_data;
+        buf_a_addr_n = buf_a_addr; buf_b_addr_n = buf_b_addr;
+        count_a_n = count_a; count_b_n = count_b;
         
         // AXI interface AR channel
         axi_ar_if.arlen = 15; axi_ar_if.arsize = 4; axi_ar_if.arburst = 1;
@@ -163,16 +168,51 @@ module DMA_ENGINE
                 done_o = 0;
                 axi_r_if.rready = 1;
 
+                // Write mem data to buffer when handshake && id (A if id==0, B if id==1)
+                // reset count every 128b=16B (burst is 4B*16=64B)
+                // set buffer write enable to 1 every 128b=16B
+
+                // buffer A - handshake && id
+                if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
+                    buf_a_wbyteenable_o = 'hffff;
+                    buf_a_addr_n = buf_a_addr;
+                    buf_a_data_n = (buf_a_data << 32) | axi_r_if.rdata;
+                    count_a_n = count_a + 1;
+                end
+
+                if (count_a == 3) begin
+                    buf_a_wren_o = 1;
+                    count_a_n = 0;
+                end
+
+                if (buf_a_wren_o)
+                    buf_a_addr_n = buf_a_addr + 1;
+                
+                // buffer B - handshake && id
+                if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
+                    buf_b_wbyteenable_o = 'hffff;
+                    buf_b_addr_n = buf_b_addr;
+                    buf_b_data_n = (buf_b_data << 32) | axi_r_if.rdata;
+                    count_b_n  = count_b + 1;
+                end
+
+                if (count_b == 3) begin
+                    buf_b_wren_o = 1;
+                    count_b_n = 0;
+                end
+
+                if (buf_b_wren_o)
+                    buf_b_addr_n = buf_b_addr + 1;
+                
                 if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
-                    mm_start_n = 1;
                     state_n = WAIT_MM;
             end
             WAIT_MM: begin
                 done_o = 0;
-                if (mm_start)
+                if (mm_start_o)
                     state_n = WAIT_MM;
 
-                if (mm_done_i && !mm_start)
+                if (mm_done_i && !mm_start_o)
                     state_n = ADDR_C;
                 
             end
@@ -234,59 +274,19 @@ module DMA_ENGINE
     // Counters and addresses
     always @(posedge clk) begin
 
-        buf_a_wren_o <= 0; buf_b_wren_o <= 0;
+        mm_start_o <= 0;
 
         if (!rst_n) begin
-
-            buf_a_addr <= 0; buf_b_addr <= 0;
-            buf_a_data <= 0; buf_b_data <= 0;
             count_a <= 0; count_b <= 0;
+            mm_start_o <= 0;
 
         end else begin
             case (state)
 
                 LOAD: begin
-                    // Write mem data to buffer when handshake && id (A if id==0, B if id==1)
-                    // reset count every 128b=16B (burst is 4B*16=64B)
-                    // set buffer write enable to 1 every 128b=16B
-
-                    // buffer A - handshake && id
-                    if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
-                        buf_a_wbyteenable_o <= 'hffff;
-                        buf_a_addr <= buf_a_addr;
-                        buf_a_data <= (buf_a_data << 32) | axi_r_if.rdata;
-                        count_a <= count_a + 1;
-                    end
-
-                    if (count_a == 3) begin
-                        buf_a_wren_o <= 1;
-                        count_a <= 0;
-                    end
-
-                    if (buf_a_wren_o)
-                        buf_a_addr <= buf_a_addr + 1;
+                    if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
+                        mm_start_o <= 1;
                     
-                    // buffer B - handshake && id
-                    if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
-                        buf_b_wbyteenable_o <= 'hffff;
-                        buf_b_addr <= buf_b_addr;
-                        buf_b_data <= (buf_b_data << 32) | axi_r_if.rdata;
-                        count_b <= count_b + 1;
-                    end
-
-                    if (count_b == 3) begin
-                        buf_b_wren_o <= 1;
-                        count_b <= 0;
-                    end
-
-                    if (buf_b_wren_o)
-                        buf_b_addr <= buf_b_addr + 1;
-                    
-                end
-
-                WRITE_C: begin
-                    buf_a_addr <= 0;
-                    buf_b_addr <= 0;
                 end
             endcase
         end
@@ -306,7 +306,6 @@ module DMA_ENGINE
         // $display("count_c: %d, wready: %d, wvalid: %d, wdata: %h\n", count_c, axi_w_if.wready, axi_w_if.wvalid, axi_w_if.wdata);
     end
 
-    assign mm_start_o = mm_start_n;
     assign buf_a_waddr_o = buf_a_addr;
     assign buf_a_wdata_o = buf_a_data;
 
