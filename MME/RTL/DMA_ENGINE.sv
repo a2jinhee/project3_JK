@@ -62,6 +62,7 @@ module DMA_ENGINE
     reg [2:0] count_a, count_b;
     reg [4:0] count_c; 
     reg [3:0] burst_a, burst_b; 
+    reg [3:0] burst_a_n, burst_b_n;
 
     // Read matrix A from memory and store into buffer A
     // Read matrix B from memory and store into buffer B
@@ -73,11 +74,14 @@ module DMA_ENGINE
     always_ff @(posedge clk)
         if (!rst_n)
             state <= IDLE;
+            burst_a = 0; burst_b = 0;
         else
             state <= state_n;
+            burst_a <= burst_a_n; burst_b <= burst_b_n;
         
     always_comb begin 
         state_n = state;
+        burst_a_n = burst_a; burst_b_n = burst_b;
         // AXI interface AR channel
         axi_ar_if.arlen = 15; axi_ar_if.arsize = 4; axi_ar_if.arburst = 1;
         axi_ar_if.arid = 0; axi_ar_if.arvalid = 0;
@@ -96,122 +100,119 @@ module DMA_ENGINE
         axi_r_if.rready = 0;
         done_o = 1;
 
-        if (!rst_n) begin
-            burst_a = 0; burst_b = 0;   
-        end else begin
-            case (state)
-                IDLE: begin
-                    if (start_i) begin
-                        done_o = 0;
-                        state_n = ADDR_A;
-                    end
+        case (state)
+            IDLE: begin
+                if (start_i) begin
+                    done_o = 0;
+                    state_n = ADDR_A;
+                end
+            
+            end
+            ADDR_A: begin
+                // AR CHANNEL
+                // - output: arvalid, arid, araddr, arlen, arsize, arburst
+                // - input: arready
+                done_o = 0;
+                axi_ar_if.arvalid = 1;
+                axi_ar_if.arid = 0; 
+                axi_ar_if.araddr = mat_a_addr_i + (burst_a * 64); 
+
+                if (axi_ar_if.arready) begin
+                    axi_ar_if.arvalid = 0; 
+                end
+                else
+                    state_n = ADDR_A;
+
+                if (!axi_ar_if.arvalid)
+                    burst_a_n = burst_a + 1;
+
+                if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_a == (mat_width_i / 4 - 1))
+                    state_n = ADDR_B;
+            end
+            ADDR_B: begin
+                // AR CHANNEL
+                // - output: arvalid, arid, araddr, arlen, arsize, arburst
+                // - input: arready
+                done_o = 0;
+                axi_ar_if.arvalid = 1;
+                axi_ar_if.arid = 1;
+                axi_ar_if.araddr = mat_b_addr_i + (burst_b * 64); 
+
+                if (axi_ar_if.arready) begin
+                    axi_ar_if.arvalid = 0; 
+                end
+                else
+                    state_n = ADDR_B;
                 
+                if (!axi_ar_if.arvalid)
+                    burst_b_n = burst_b + 1;
+
+                if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_b == (mat_width_i / 4 - 1))
+                    state_n = LOAD;
+            end
+            LOAD: begin
+                // R CHANNEL
+                // - output: rready
+                // - input: rvalid, rid, rdata, rlast
+                done_o = 0;
+                axi_r_if.rready = 1;
+                if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
+                    state_n = WAIT_MM;
+            end
+            WAIT_MM: begin
+                done_o = 0;
+                if (mm_start_o)
+                    state_n = WAIT_MM;
+
+                if (mm_done_i && !mm_start_o)
+                    state_n = ADDR_C;
+                
+            end
+            ADDR_C: begin
+                // AW CHANNEL
+                // - output: awvalid, awid, awaddr, awlen, awsize, awburst
+                // - input: awready
+                done_o = 0;
+                axi_aw_if.awvalid = 1;
+                
+                axi_aw_if.awaddr = mat_c_addr_i; 
+
+                if (axi_aw_if.awready)
+                    axi_aw_if.awvalid = 0; 
+                else
+                    state_n = ADDR_C;
+
+                if (!axi_aw_if.awvalid && axi_aw_if.awready)
+                    state_n = WRITE_C;
+
+            end
+            WRITE_C: begin
+                // W CHANNEL
+                // - output: wvalid, wid, wdata, wlast
+                // - input: wready
+                // B CHANNEL
+                // - output: bready
+                // - input: bvalid, bid, bresp
+                done_o = 0;
+                axi_w_if.wvalid = 1;
+                axi_b_if.bready = 1;
+
+                if (axi_w_if.wready && axi_w_if.wvalid) begin
+                    axi_w_if.wdata = accum_i[count_c / 4][count_c % 4];
                 end
-                ADDR_A: begin
-                    // AR CHANNEL
-                    // - output: arvalid, arid, araddr, arlen, arsize, arburst
-                    // - input: arready
-                    done_o = 0;
-                    axi_ar_if.arvalid = 1;
-                    axi_ar_if.arid = 0; 
-                    axi_ar_if.araddr = mat_a_addr_i + (burst_a * 64); 
 
-                    if (axi_ar_if.arready) begin
-                        axi_ar_if.arvalid = 0; 
-                    end
-                    else
-                        state_n = ADDR_A;
+                // send last signal on last write
+                axi_w_if.wlast = (count_c == 15) ? 1 : 0;
 
-                    if (!axi_ar_if.arvalid)
-                        burst_a = burst_a + 1;
-
-                    if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_a == (mat_width_i / 4 - 1))
-                        state_n = ADDR_B;
-                end
-                ADDR_B: begin
-                    // AR CHANNEL
-                    // - output: arvalid, arid, araddr, arlen, arsize, arburst
-                    // - input: arready
-                    done_o = 0;
-                    axi_ar_if.arvalid = 1;
-                    axi_ar_if.arid = 1;
-                    axi_ar_if.araddr = mat_b_addr_i + (burst_b * 64); 
-
-                    if (axi_ar_if.arready) begin
-                        axi_ar_if.arvalid = 0; 
-                    end
-                    else
-                        state_n = ADDR_B;
+                // B channel handshake
+                if (axi_b_if.bready & axi_b_if.bvalid) begin
+                    done_o = 1;
+                    state_n = IDLE;
+                end 
                     
-                    if (!axi_ar_if.arvalid)
-                        burst_b = burst_b + 1;
+            end
 
-                    if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_b == (mat_width_i / 4 - 1))
-                        state_n = LOAD;
-                end
-                LOAD: begin
-                    // R CHANNEL
-                    // - output: rready
-                    // - input: rvalid, rid, rdata, rlast
-                    done_o = 0;
-                    axi_r_if.rready = 1;
-                    if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
-                        state_n = WAIT_MM;
-                end
-                WAIT_MM: begin
-                    done_o = 0;
-                    if (mm_start_o)
-                        state_n = WAIT_MM;
-
-                    if (mm_done_i && !mm_start_o)
-                        state_n = ADDR_C;
-                    
-                end
-                ADDR_C: begin
-                    // AW CHANNEL
-                    // - output: awvalid, awid, awaddr, awlen, awsize, awburst
-                    // - input: awready
-                    done_o = 0;
-                    axi_aw_if.awvalid = 1;
-                    
-                    axi_aw_if.awaddr = mat_c_addr_i; 
-
-                    if (axi_aw_if.awready)
-                        axi_aw_if.awvalid = 0; 
-                    else
-                        state_n = ADDR_C;
-
-                    if (!axi_aw_if.awvalid && axi_aw_if.awready)
-                        state_n = WRITE_C;
-
-                end
-                WRITE_C: begin
-                    // W CHANNEL
-                    // - output: wvalid, wid, wdata, wlast
-                    // - input: wready
-                    // B CHANNEL
-                    // - output: bready
-                    // - input: bvalid, bid, bresp
-                    done_o = 0;
-                    axi_w_if.wvalid = 1;
-                    axi_b_if.bready = 1;
-
-                    if (axi_w_if.wready && axi_w_if.wvalid) begin
-                        axi_w_if.wdata = accum_i[count_c / 4][count_c % 4];
-                    end
-
-                    // send last signal on last write
-                    axi_w_if.wlast = (count_c == 15) ? 1 : 0;
-
-                    // B channel handshake
-                    if (axi_b_if.bready & axi_b_if.bvalid) begin
-                        done_o = 1;
-                        state_n = IDLE;
-                    end 
-                        
-                end
-            endcase
-        end
+        endcase
     end
 
     // Counters and addresses
