@@ -196,7 +196,7 @@ module DMA_ENGINE
                 end
 
 
-                if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i) && axi_r_if.rlast)
+                if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
                     state_n = WAIT_MM;
                     mm_start_o = 1;
                     
