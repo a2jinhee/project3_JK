@@ -343,8 +343,8 @@ module DMA_ENGINE
     assign buf_a_waddr_o = buf_a_addr;
     assign buf_b_waddr_o = buf_b_addr;
 
-    assign buf_a_wdata_o = buf_a_data;
-    assign buf_b_wdata_o = buf_b_data;
+    assign buf_a_wdata_o = buf_a_data_n;
+    assign buf_b_wdata_o = buf_b_data_n;
 
 
 
