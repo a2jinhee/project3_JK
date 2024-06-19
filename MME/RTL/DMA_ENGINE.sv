@@ -61,8 +61,8 @@ module DMA_ENGINE
     reg [BUF_AW-1:0] buf_a_addr, buf_b_addr;
     reg [2:0] count_a, count_b;
     reg [4:0] count_c; 
-    reg [3:0] burst_a, burst_b; 
-    reg [3:0] burst_a_n, burst_b_n;
+    reg [1:0] burst_a, burst_b; 
+    reg [1:0] burst_a_n, burst_b_n;
 
     // Read matrix A from memory and store into buffer A
     // Read matrix B from memory and store into buffer B
@@ -121,12 +121,10 @@ module DMA_ENGINE
 
                 if (axi_ar_if.arready) begin
                     axi_ar_if.arvalid = 0; 
+                    burst_a_n = burst_a + 1;
                 end
                 else
                     state_n = ADDR_A;
-
-                if (!axi_ar_if.arvalid)
-                    burst_a_n = burst_a + 1;
 
                 if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_a == (mat_width_i / 4 - 1))
                     state_n = ADDR_B;
@@ -142,12 +140,10 @@ module DMA_ENGINE
 
                 if (axi_ar_if.arready) begin
                     axi_ar_if.arvalid = 0; 
+                    burst_b_n = burst_b + 1;
                 end
                 else
                     state_n = ADDR_B;
-                
-                if (!axi_ar_if.arvalid)
-                    burst_b_n = burst_b + 1;
 
                 if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_b == (mat_width_i / 4 - 1))
                     state_n = LOAD;
