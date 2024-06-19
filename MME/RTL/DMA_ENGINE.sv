@@ -60,7 +60,7 @@ module DMA_ENGINE
     reg [BUF_DW-1:0] buf_a_data, buf_b_data;
     reg [BUF_AW-1:0] buf_a_addr, buf_b_addr;
     reg [2:0] count_a, count_b;
-    reg [4:0] count_c; count_c_n; 
+    reg [4:0] count_c, count_c_n; 
     reg [1:0] burst_a, burst_b; 
     reg [1:0] burst_a_n, burst_b_n;
 
