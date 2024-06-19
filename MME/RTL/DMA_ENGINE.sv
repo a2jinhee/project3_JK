@@ -59,9 +59,9 @@ module DMA_ENGINE
     reg [2:0] state, state_n;
     reg [BUF_DW-1:0] buf_a_data, buf_b_data;
     reg [BUF_AW-1:0] buf_a_addr, buf_b_addr;
-    reg [5:0] count_a, count_b, count_c; 
+    reg [2:0] count_a, count_b;
+    reg [4:0] count_c; 
     reg [3:0] burst_a, burst_b; 
-
 
     // Read matrix A from memory and store into buffer A
     // Read matrix B from memory and store into buffer B
@@ -195,10 +195,9 @@ module DMA_ENGINE
                 // B channel handshake
                 if (axi_b_if.bready & axi_b_if.bvalid) begin
                     done_o = 1;
-                end 
-
-                if (done_o)
                     state_n = IDLE;
+                end 
+                    
             end
 
         endcase
@@ -286,7 +285,7 @@ module DMA_ENGINE
                         burst_a <= 0; 
                         burst_b <= 0;
                     end
-                    // don't update down here. 
+                    // don't update done here. 
                     // if (axi_b_if.bready && axi_b_if.bvalid)
                     //     done_o <= 1;
                 end
