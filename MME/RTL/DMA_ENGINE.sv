@@ -200,7 +200,7 @@ always_comb begin
             end
 
             if (axi_r_if.rlast) begin
-                if ((buf_a_addr == mat_width_i-1) && (buf_b_addr == mat_width_i-1))
+                if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i-1))
                     state_n = WAIT_MM;
                     mm_start_o = 1; 
             end
