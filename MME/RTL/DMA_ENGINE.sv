@@ -173,7 +173,7 @@ module DMA_ENGINE
                 axi_r_if.rready = 1;
 
                 if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
-                    buf_a_waddr_o = buf_a_addr_n; 
+                    buf_a_addr_n <= buf_a_addr;
                     buf_a_data_n <= (buf_a_data << 32) | axi_r_if.rdata;
                     count_a_n = count_a + 1;
                 end
@@ -187,7 +187,7 @@ module DMA_ENGINE
                     buf_a_addr_n = buf_a_addr + 1;
 
                 if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
-                    buf_b_waddr_o = buf_b_addr_n; 
+                    buf_b_addr_n <= buf_b_addr;
                     buf_b_data_n <= (buf_b_data << 32) | axi_r_if.rdata;
                     count_b_n = count_b + 1;
                 end
@@ -342,8 +342,8 @@ module DMA_ENGINE
         // $display("count_c: %d, wready: %d, wvalid: %d, wdata: %h\n", count_c, axi_w_if.wready, axi_w_if.wvalid, axi_w_if.wdata);
     end
 
-    // assign buf_a_waddr_o = buf_a_addr;
-    // assign buf_b_waddr_o = buf_b_addr;
+    assign buf_a_waddr_o = buf_a_addr;
+    assign buf_b_waddr_o = buf_b_addr;
 
     assign buf_a_wdata_o = buf_a_data;
     assign buf_b_wdata_o = buf_b_data;
