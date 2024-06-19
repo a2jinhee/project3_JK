@@ -74,7 +74,7 @@ module DMA_ENGINE
     always_ff @(posedge clk)
         if (!rst_n)
             state <= IDLE;
-            burst_a = 0; burst_b = 0;
+            burst_a <= 0; burst_b <= 0;
         else
             state <= state_n;
             burst_a <= burst_a_n; burst_b <= burst_b_n;
