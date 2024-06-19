@@ -115,6 +115,7 @@ module DMA_ENGINE
 
                 if (axi_ar_if.arready)
                     axi_ar_if.arvalid = 0; 
+                    burst_a = burst_a + 1;
                 else
                     state_n = ADDR_A;
 
@@ -132,6 +133,7 @@ module DMA_ENGINE
 
                 if (axi_ar_if.arready)
                     axi_ar_if.arvalid = 0; 
+                    burst_b = burst_b + 1;
                 else
                     state_n = ADDR_B;
 
@@ -214,21 +216,10 @@ module DMA_ENGINE
             buf_a_addr <= 0; buf_b_addr <= 0;
             buf_a_data <= 0; buf_b_data <= 0;
             count_a <= 0; count_b <= 0; count_c <= 0;
-            burst_a <= 0; burst_b <= 0;
             mm_start_o <= 0;
 
         end else begin
             case (state)
-
-                ADDR_A: begin
-                    if (axi_ar_if.arready)
-                        burst_a <= burst_a + 1;
-                end
-
-                ADDR_B: begin
-                    if (axi_ar_if.arready)
-                        burst_b <= burst_b + 1;
-                end
 
                 LOAD: begin
                     // Write mem data to buffer when handshake && id (A if id==0, B if id==1)
@@ -282,8 +273,6 @@ module DMA_ENGINE
 
                     if (count_c == 15) begin
                         count_c <= 0; 
-                        burst_a <= 0; 
-                        burst_b <= 0;
                     end
                     // don't update done here. 
                     // if (axi_b_if.bready && axi_b_if.bvalid)
