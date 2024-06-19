@@ -96,6 +96,9 @@ module DMA_ENGINE
         axi_r_if.rready = 0;
         done_o = 1;
 
+        if (!rst_n)
+            burst_a = 0; burst_b = 0;   
+        else begin
         case (state)
             IDLE: begin
                 if (start_i) begin
@@ -109,8 +112,6 @@ module DMA_ENGINE
                 // - output: arvalid, arid, araddr, arlen, arsize, arburst
                 // - input: arready
                 done_o = 0;
-                if (axi_ar_if.araddr==0)
-                    burst_a = 0;
                 axi_ar_if.arvalid = 1;
                 axi_ar_if.arid = 0; 
                 axi_ar_if.araddr = mat_a_addr_i + (burst_a * 64); 
@@ -211,6 +212,7 @@ module DMA_ENGINE
             end
 
         endcase
+        end
     end
 
     // Counters and addresses
