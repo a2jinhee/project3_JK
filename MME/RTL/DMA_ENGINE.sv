@@ -188,7 +188,6 @@ always_comb begin
                 buf_a_addr_n = buf_a_addr + 1;
             end
 
-
             if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
                 buf_b_data_n = (buf_b_data << 32) | axi_r_if.rdata;
                 count_b_n = count_b + 1;
@@ -199,8 +198,9 @@ always_comb begin
                 buf_b_wren_o = 1;
                 buf_b_addr_n = buf_b_addr + 1;
             end
+
             if (axi_r_if.rlast) begin
-                if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
+                if ((buf_a_addr == mat_width_i-1) && (buf_b_addr == mat_width_i-1))
                     state_n = WAIT_MM;
                     mm_start_o = 1; 
             end
