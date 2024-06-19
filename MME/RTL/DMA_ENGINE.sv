@@ -106,6 +106,7 @@ module DMA_ENGINE
                 if (start_i) begin
                     done_o = 0;
                     state_n = ADDR_A;
+                    burst_a_n = 0; burst_b_n = 0;
                 end
             
             end
