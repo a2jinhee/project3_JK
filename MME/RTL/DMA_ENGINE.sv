@@ -48,268 +48,141 @@ module DMA_ENGINE
     // TODO: implement me
 
     // FSM states
-    localparam  IDLE        = 3'b000,
-                ADDR_A      = 3'b001,
-                ADDR_B      = 3'b010,
-                LOAD        = 3'b011,
-                WAIT_MM     = 3'b100,
-                ADDR_C      = 3'b101,
-                WRITE_C     = 3'b110;
+localparam  IDLE        = 3'b000,
+            ADDR_A_B    = 3'b001,
+            LOAD        = 3'b010,
+            WAIT_MM     = 3'b011,
+            WRITE_C     = 3'b100;
 
-    reg [2:0] state, state_n;
-    reg [BUF_DW-1:0] buf_a_data, buf_b_data;
-    reg [BUF_AW-1:0] buf_a_addr, buf_b_addr;
-    reg [2:0] count_a, count_b;
-    reg [4:0] count_c; 
-    reg [3:0] burst_a, burst_b; 
+reg [2:0] state, state_n;
+reg [BUF_DW-1:0] buf_a_data, buf_b_data;
+reg [BUF_AW-1:0] buf_a_addr, buf_b_addr;
+reg [4:0] count_c; 
+reg [3:0] burst_count; 
 
-    // Read matrix A from memory and store into buffer A
-    // Read matrix B from memory and store into buffer B
-    // To hide DRAM latency, read matrix A and B in parallel
-    // Generate single-pulse start command to MM_ENGINE
-    // Wait for the done signal from MM_ENGINE to be 1
-    // Read output matrix C from MM_ENGINE and write to memory
+// Simplify and merge states for reading A and B addresses
+always_comb begin 
+    state_n = state;
+    done_o = 0;
 
-    always_ff @(posedge clk)
-        if (!rst_n)
-            state <= IDLE;
-        else
-            state <= state_n;
-        
-    always_comb begin 
-        state_n = state;
-        // AXI interface AR channel
-        axi_ar_if.arlen = 15; axi_ar_if.arsize = 4; axi_ar_if.arburst = 1;
-        axi_ar_if.arid = 0; axi_ar_if.arvalid = 0;
+    // Default AXI settings
+    axi_ar_if.arvalid = 0;
+    axi_aw_if.awvalid = 0;
+    axi_w_if.wvalid = 0;
+    axi_b_if.bready = 0;
+    axi_r_if.rready = 0;
 
-        // AXI interface AW channel
-        axi_aw_if.awvalid = 0; axi_aw_if.awlen = 15; axi_aw_if.awsize = 4;
-        axi_aw_if.awburst = 1; axi_aw_if.awid = 0;
+    case (state)
+        IDLE: begin
+            if (start_i) begin
+                done_o = 0;
+                state_n = ADDR_A_B;
+            end
+        end
+        ADDR_A_B: begin
+            done_o = 0;
+            // Setup for burst read from A and B addresses
+            axi_ar_if.arvalid = 1;
+            axi_ar_if.arid = 0; 
+            axi_ar_if.araddr = (burst_count < (mat_width_i / 4)) ? 
+                                (mat_a_addr_i + (burst_count * 64)) : 
+                                (mat_b_addr_i + ((burst_count - (mat_width_i / 4)) * 64)); 
 
-        // AXI interface W channel
-        axi_w_if.wvalid = 0; axi_w_if.wlast = 0; axi_w_if.wid = 0; axi_w_if.wstrb = 'hf;
+            if (axi_ar_if.arready) begin
+                burst_count <= burst_count + 1;
+                axi_ar_if.arvalid = 0; 
+            end
 
-        // AXI interface B channel
-        axi_b_if.bready = 0;
+            if (burst_count == (mat_width_i / 2)) begin
+                state_n = LOAD;
+                burst_count <= 0;
+            end
+        end
+        LOAD: begin
+            done_o = 0;
+            axi_r_if.rready = 1;
 
-        // AXI interface R channel
-        axi_r_if.rready = 0;
-        done_o = 1;
-
-        case (state)
-            IDLE: begin
-                if (start_i) begin
-                    done_o = 0;
-                    state_n = ADDR_A;
+            if (axi_r_if.rready && axi_r_if.rvalid) begin
+                if (axi_r_if.rid == 0) begin
+                    buf_a_wbyteenable_o <= 'hffff;
+                    buf_a_data <= (buf_a_data << 32) | axi_r_if.rdata;
+                    buf_a_wren_o <= 1;
+                    buf_a_addr <= buf_a_addr + 1;
+                end else begin
+                    buf_b_wbyteenable_o <= 'hffff;
+                    buf_b_data <= (buf_b_data << 32) | axi_r_if.rdata;
+                    buf_b_wren_o <= 1;
+                    buf_b_addr <= buf_b_addr + 1;
                 end
-            
-            end
-            ADDR_A: begin
-                // AR CHANNEL
-                // - output: arvalid, arid, araddr, arlen, arsize, arburst
-                // - input: arready
-                done_o = 0;
-                axi_ar_if.arvalid = 1;
-                axi_ar_if.arid = 0; 
-                axi_ar_if.araddr = mat_a_addr_i + (burst_a * 64); 
 
-                if (axi_ar_if.arready)
-                    axi_ar_if.arvalid = 0; 
-                else
-                    state_n = ADDR_A;
-
-                if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_a == (mat_width_i / 4 - 1))
-                    state_n = ADDR_B;
-            end
-            ADDR_B: begin
-                // AR CHANNEL
-                // - output: arvalid, arid, araddr, arlen, arsize, arburst
-                // - input: arready
-                done_o = 0;
-                axi_ar_if.arvalid = 1;
-                axi_ar_if.arid = 1;
-                axi_ar_if.araddr = mat_b_addr_i + (burst_b * 64); 
-
-                if (axi_ar_if.arready)
-                    axi_ar_if.arvalid = 0; 
-                else
-                    state_n = ADDR_B;
-
-                if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_b == (mat_width_i / 4 - 1))
-                    state_n = LOAD;
-            end
-            LOAD: begin
-                // R CHANNEL
-                // - output: rready
-                // - input: rvalid, rid, rdata, rlast
-                done_o = 0;
-                axi_r_if.rready = 1;
-                if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
+                if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i)) begin
+                    mm_start_o <= 1;
                     state_n = WAIT_MM;
+                end
             end
-            WAIT_MM: begin
-                done_o = 0;
-                if (mm_start_o)
-                    state_n = WAIT_MM;
-
-                if (mm_done_i && !mm_start_o)
-                    state_n = ADDR_C;
-                
+        end
+        WAIT_MM: begin
+            done_o = 0;
+            if (mm_done_i) begin
+                state_n = WRITE_C;
             end
-            ADDR_C: begin
-                // AW CHANNEL
-                // - output: awvalid, awid, awaddr, awlen, awsize, awburst
-                // - input: awready
-                done_o = 0;
-                axi_aw_if.awvalid = 1;
-                
-                axi_aw_if.awaddr = mat_c_addr_i; 
+        end
+        WRITE_C: begin
+            done_o = 0;
+            axi_aw_if.awvalid = 1;
+            axi_aw_if.awaddr = mat_c_addr_i;
 
-                if (axi_aw_if.awready)
-                    axi_aw_if.awvalid = 0; 
-                else
-                    state_n = ADDR_C;
-
-                if (!axi_aw_if.awvalid && axi_aw_if.awready)
-                    state_n = WRITE_C;
-
-            end
-            WRITE_C: begin
-                // W CHANNEL
-                // - output: wvalid, wid, wdata, wlast
-                // - input: wready
-                // B CHANNEL
-                // - output: bready
-                // - input: bvalid, bid, bresp
-                done_o = 0;
+            if (axi_aw_if.awready) begin
+                axi_aw_if.awvalid = 0;
                 axi_w_if.wvalid = 1;
                 axi_b_if.bready = 1;
 
-                if (axi_w_if.wready && axi_w_if.wvalid) begin
+                if (axi_w_if.wready) begin
                     axi_w_if.wdata = accum_i[count_c / 4][count_c % 4];
+                    count_c <= count_c + 1;
+                    axi_w_if.wlast = (count_c == 15);
+
+                    if (axi_b_if.bready && axi_b_if.bvalid) begin
+                        done_o = 1;
+                        state_n = IDLE;
+                    end
                 end
-
-                // send last signal on last write
-                axi_w_if.wlast = (count_c == 15) ? 1 : 0;
-
-                // B channel handshake
-                if (axi_b_if.bready & axi_b_if.bvalid) begin
-                    done_o = 1;
-                    state_n = IDLE;
-                end 
-                    
             end
+        end
+    endcase
+end
 
+// Counters and addresses
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        buf_a_addr <= 0; buf_b_addr <= 0;
+        buf_a_data <= 0; buf_b_data <= 0;
+        count_c <= 0;
+        burst_count <= 0;
+        mm_start_o <= 0;
+    end else begin
+        buf_a_wren_o <= 0; buf_b_wren_o <= 0;
+
+        case (state)
+            ADDR_A_B: begin
+                if (axi_ar_if.arready) burst_count <= burst_count + 1;
+            end
+            LOAD: begin
+                // handled in always_comb block
+            end
+            WRITE_C: begin
+                if (axi_w_if.wready && axi_w_if.wvalid) count_c <= count_c + 1;
+            end
         endcase
     end
+end
 
-    // Counters and addresses
-    always @(posedge clk) begin
+assign buf_a_waddr_o = buf_a_addr;
+assign buf_a_wdata_o = buf_a_data;
 
-        buf_a_wren_o <= 0; buf_b_wren_o <= 0;
-        mm_start_o <= 0;
+assign buf_b_waddr_o = buf_b_addr;
+assign buf_b_wdata_o = buf_b_data;
 
-        if (!rst_n) begin
-
-            buf_a_addr <= 0; buf_b_addr <= 0;
-            buf_a_data <= 0; buf_b_data <= 0;
-            count_a <= 0; count_b <= 0; count_c <= 0;
-            burst_a <= 0; burst_b <= 0;
-            mm_start_o <= 0;
-
-        end else begin
-            case (state)
-
-                ADDR_A: begin
-                    if (axi_ar_if.arready)
-                        burst_a <= burst_a + 1;
-                end
-
-                ADDR_B: begin
-                    if (axi_ar_if.arready)
-                        burst_b <= burst_b + 1;
-                end
-
-                LOAD: begin
-                    // Write mem data to buffer when handshake && id (A if id==0, B if id==1)
-                    // reset count every 128b=16B (burst is 4B*16=64B)
-                    // set buffer write enable to 1 every 128b=16B
-
-                    // buffer A - handshake && id
-                    if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
-                        buf_a_wbyteenable_o <= 'hffff;
-                        buf_a_addr <= buf_a_addr;
-                        buf_a_data <= (buf_a_data << 32) | axi_r_if.rdata;
-                        count_a <= count_a + 1;
-                    end
-
-                    if (count_a == 3) begin
-                        buf_a_wren_o <= 1;
-                        buf_a_addr <= buf_a_addr + 1;
-                        count_a <= 0;
-                    end
-                        
-                    
-                    // buffer B - handshake && id
-                    if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
-                        buf_b_wbyteenable_o <= 'hffff;
-                        buf_b_addr <= buf_b_addr;
-                        buf_b_data <= (buf_b_data << 32) | axi_r_if.rdata;
-                        count_b <= count_b + 1;
-                    end
-
-                    if (count_b == 3) begin
-                        buf_b_wren_o <= 1;
-                        buf_b_addr <= buf_b_addr + 1;
-                        count_b <= 0;
-                    end
-                        
-                    
-                    if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
-                        mm_start_o <= 1;
-                    
-                end
-
-                WRITE_C: begin
-                    buf_a_addr <= 0;
-                    buf_b_addr <= 0;
-                    // update counter when handshake
-                    if (axi_w_if.wready && axi_w_if.wvalid) begin
-                        count_c <= count_c + 1;
-                    end
-
-                    if (count_c == 15) begin
-                        count_c <= 0; 
-                        burst_a <= 0; 
-                        burst_b <= 0;
-                    end
-                    // don't update down here. 
-                    // if (axi_b_if.bready && axi_b_if.bvalid)
-                    //     done_o <= 1;
-                end
-            endcase
-        end
-        // $display("state: %d, state_n: %d\n", state, state_n);
-        
-        // $display("rready: %d, rvalid: %d, rid: %d, rdata: %h\n", axi_r_if.rready, axi_r_if.rvalid, axi_r_if.rid, axi_r_if.rdata);
-
-        // LOAD 
-        // $display("arvalid: %d, arlen: %d, arsize: %d, arburst: %d, araddr: %d, arready: %d\n", axi_ar_if.arvalid, axi_ar_if.arlen, axi_ar_if.arsize, axi_ar_if.arburst, axi_ar_if.araddr, axi_ar_if.arready);
-        // $display("buf_a_addr: %d, buf_b_addr: %d, count_a: %d, count_b: %d, buf_a_wren_o: %d, buf_b_wren_o: %d, buf_a_data: %h, buf_b_data: %h\n", buf_a_addr, buf_b_addr, count_a, count_b, buf_a_wren_o, buf_b_wren_o, buf_a_data, buf_b_data);   
-        // $display("mm_start_o: %d, mm_done_i: %d\n", mm_start_o, mm_done_i);
-
-        // ADDR_C
-        // $display("awvalid: %d, awlen: %d, awsize: %d, awburst: %d, awaddr: %d, awready: %d\n", axi_aw_if.awvalid, axi_aw_if.awlen, axi_aw_if.awsize, axi_aw_if.awburst, axi_aw_if.awaddr, axi_aw_if.awready);
-
-        // WRITE_C 
-        // $display("count_c: %d, wready: %d, wvalid: %d, wdata: %h\n", count_c, axi_w_if.wready, axi_w_if.wvalid, axi_w_if.wdata);
-    end
-
-    assign buf_a_waddr_o = buf_a_addr;
-    assign buf_a_wdata_o = buf_a_data;
-
-    assign buf_b_waddr_o = buf_b_addr;
-    assign buf_b_wdata_o = buf_b_data;
 
 
     
