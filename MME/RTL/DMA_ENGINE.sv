@@ -63,7 +63,7 @@ module DMA_ENGINE
     reg [4:0] count_c, count_c_n; 
     reg [1:0] burst_a, burst_b; 
     reg [1:0] burst_a_n, burst_b_n;
-    reg mm_start; 
+    reg mm_start, mm_start_n; 
 
     // Read matrix A from memory and store into buffer A
     // Read matrix B from memory and store into buffer B
@@ -77,16 +77,19 @@ module DMA_ENGINE
             state <= IDLE;
             burst_a <= 0; burst_b <= 0;
             count_c <= 0;
+            mm_start <= 0;
         end else begin
             state <= state_n;
             burst_a <= burst_a_n; burst_b <= burst_b_n;
             count_c <= count_c_n;
+            mm_start <= mm_start_n;
         end
         
     always_comb begin 
         state_n = state;
         burst_a_n = burst_a; burst_b_n = burst_b;
         count_c_n = count_c;
+        mm_start_n = mm_start;
         
         // AXI interface AR channel
         axi_ar_if.arlen = 15; axi_ar_if.arsize = 4; axi_ar_if.arburst = 1;
@@ -105,7 +108,6 @@ module DMA_ENGINE
         // AXI interface R channel
         axi_r_if.rready = 0;
         done_o = 1;
-        mm_start = 0;
 
         case (state)
             IDLE: begin
@@ -162,7 +164,7 @@ module DMA_ENGINE
                 axi_r_if.rready = 1;
 
                 if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
-                    mm_start = 1;
+                    mm_start_n = 1;
                     state_n = WAIT_MM;
             end
             WAIT_MM: begin
@@ -304,7 +306,7 @@ module DMA_ENGINE
         // $display("count_c: %d, wready: %d, wvalid: %d, wdata: %h\n", count_c, axi_w_if.wready, axi_w_if.wvalid, axi_w_if.wdata);
     end
 
-    assign mm_start_o = mm_start;
+    assign mm_start_o = mm_start_n;
     assign buf_a_waddr_o = buf_a_addr;
     assign buf_a_wdata_o = buf_a_data;
 
