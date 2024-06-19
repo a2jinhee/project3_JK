@@ -204,7 +204,7 @@ module DMA_ENGINE
                 if (buf_b_wren_o)
                     buf_b_addr_n = buf_b_addr + 1;
                 
-                if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
+                if ((buf_a_addr == mat_width_i-1) && (buf_b_addr == mat_width_i-1))
                     state_n = WAIT_MM;
             end
             WAIT_MM: begin
@@ -305,11 +305,11 @@ module DMA_ENGINE
         // $display("count_c: %d, wready: %d, wvalid: %d, wdata: %h\n", count_c, axi_w_if.wready, axi_w_if.wvalid, axi_w_if.wdata);
     end
 
-    assign buf_a_waddr_o = buf_a_addr;
-    assign buf_a_wdata_o = buf_a_data;
+    assign buf_a_waddr_o = buf_a_addr_n;
+    assign buf_a_wdata_o = buf_a_data_n;
 
-    assign buf_b_waddr_o = buf_b_addr;
-    assign buf_b_wdata_o = buf_b_data;
+    assign buf_b_waddr_o = buf_b_addr_n;
+    assign buf_b_wdata_o = buf_b_data_n;
 
 
     
