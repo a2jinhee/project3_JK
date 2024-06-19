@@ -113,6 +113,7 @@ always_comb begin
     // AXI interface R channel
     axi_r_if.rready = 0;
     done_o = 1;
+    mm_start_o = 1; 
     buf_a_wbyteenable_o = 'hffff;
     buf_b_wbyteenable_o = 'hffff;
 
@@ -122,6 +123,7 @@ always_comb begin
         IDLE: begin
             if (start_i) begin
                 done_o = 0;
+                mm_start_o = 0; 
                 state_n = ADDR_A;
                 burst_a_n = 0; burst_b_n = 0;
             end
@@ -132,6 +134,7 @@ always_comb begin
             // - output: arvalid, arid, araddr, arlen, arsize, arburst
             // - input: arready
             done_o = 0;
+            mm_start_o =0; 
             axi_ar_if.arvalid = 1;
             axi_ar_if.arid = 0;
             axi_ar_if.araddr = mat_a_addr_i + (burst_a * 64);
@@ -151,6 +154,7 @@ always_comb begin
             // - output: arvalid, arid, araddr, arlen, arsize, arburst
             // - input: arready
             done_o = 0;
+            mm_start_o = 0; 
             axi_ar_if.arvalid = 1;
             axi_ar_if.arid = 1;
             axi_ar_if.araddr = mat_b_addr_i + (burst_b * 64);
@@ -170,6 +174,7 @@ always_comb begin
             // - output: rready
             // - input: rvalid, rid, rdata, rlast
             done_o = 0;
+            mm_start_o = 0; 
             axi_r_if.rready = 1;
 
             if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
@@ -195,9 +200,9 @@ always_comb begin
                 buf_b_addr_n = buf_b_addr + 1;
             end
 
-
             if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
                 state_n = WAIT_MM;
+                mm_start_o = 1; 
                 
         end
         WAIT_MM: begin
@@ -216,6 +221,7 @@ always_comb begin
             // - output: awvalid, awid, awaddr, awlen, awsize, awburst
             // - input: awready
             done_o = 0;
+            mm_start_o = 0; 
             axi_aw_if.awvalid = 1;
             
             axi_aw_if.awaddr = mat_c_addr_i;
@@ -237,6 +243,7 @@ always_comb begin
             // - output: bready
             // - input: bvalid, bid, bresp
             done_o = 0;
+            mm_start_o = 0; 
             axi_w_if.wvalid = 1;
             axi_b_if.bready = 1;
 
@@ -266,42 +273,37 @@ always_comb begin
     endcase
 end
 
-// Counters and addresses
-always @(posedge clk) begin
+// // Counters and addresses
+// always @(posedge clk) begin
 
-    mm_start_o <= 0;
+//     mm_start_o <= 0;
 
-    if (!rst_n) begin
+//     if (!rst_n) begin
+//         mm_start_o <= 0;
+//     end else begin
+//         case (state)
+//             LOAD: begin
+//                 if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
+//                     mm_start_o <= 1;
+//             end
 
-        mm_start_o <= 0;
-
-    end else begin
-        case (state)
-
-            LOAD: begin
-                
-                if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
-                    mm_start_o <= 1;
-                
-            end
-
-        endcase
-    end
-    // $display("state: %d, state_n: %d\n", state, state_n);
+//         endcase
+//     end
+//     // $display("state: %d, state_n: %d\n", state, state_n);
     
-    // $display("rready: %d, rvalid: %d, rid: %d, rdata: %h\n", axi_r_if.rready, axi_r_if.rvalid, axi_r_if.rid, axi_r_if.rdata);
+//     // $display("rready: %d, rvalid: %d, rid: %d, rdata: %h\n", axi_r_if.rready, axi_r_if.rvalid, axi_r_if.rid, axi_r_if.rdata);
 
-    // LOAD
-    // $display("arvalid: %d, arlen: %d, arsize: %d, arburst: %d, araddr: %d, arready: %d\n", axi_ar_if.arvalid, axi_ar_if.arlen, axi_ar_if.arsize, axi_ar_if.arburst, axi_ar_if.araddr, axi_ar_if.arready);
-    // $display("buf_a_addr: %d, buf_b_addr: %d, count_a: %d, count_b: %d, buf_a_wren_o: %d, buf_b_wren_o: %d, buf_a_data: %h, buf_b_data: %h\n", buf_a_addr, buf_b_addr, count_a, count_b, buf_a_wren_o, buf_b_wren_o, buf_a_data, buf_b_data);   
-    // $display("mm_start_o: %d, mm_done_i: %d\n", mm_start_o, mm_done_i);
+//     // LOAD
+//     // $display("arvalid: %d, arlen: %d, arsize: %d, arburst: %d, araddr: %d, arready: %d\n", axi_ar_if.arvalid, axi_ar_if.arlen, axi_ar_if.arsize, axi_ar_if.arburst, axi_ar_if.araddr, axi_ar_if.arready);
+//     // $display("buf_a_addr: %d, buf_b_addr: %d, count_a: %d, count_b: %d, buf_a_wren_o: %d, buf_b_wren_o: %d, buf_a_data: %h, buf_b_data: %h\n", buf_a_addr, buf_b_addr, count_a, count_b, buf_a_wren_o, buf_b_wren_o, buf_a_data, buf_b_data);   
+//     // $display("mm_start_o: %d, mm_done_i: %d\n", mm_start_o, mm_done_i);
 
-    // ADDR_C
-    // $display("awvalid: %d, awlen: %d, awsize: %d, awburst: %d, awaddr: %d, awready: %d\n", axi_aw_if.awvalid, axi_aw_if.awlen, axi_aw_if.awsize, axi_aw_if.awburst, axi_aw_if.awaddr, axi_aw_if.awready);
+//     // ADDR_C
+//     // $display("awvalid: %d, awlen: %d, awsize: %d, awburst: %d, awaddr: %d, awready: %d\n", axi_aw_if.awvalid, axi_aw_if.awlen, axi_aw_if.awsize, axi_aw_if.awburst, axi_aw_if.awaddr, axi_aw_if.awready);
 
-    // WRITE_C
-    // $display("count_c: %d, wready: %d, wvalid: %d, wdata: %h\n", count_c, axi_w_if.wready, axi_w_if.wvalid, axi_w_if.wdata);
-end
+//     // WRITE_C
+//     // $display("count_c: %d, wready: %d, wvalid: %d, wdata: %h\n", count_c, axi_w_if.wready, axi_w_if.wvalid, axi_w_if.wdata);
+// end
 
 assign buf_a_waddr_o = buf_a_addr;
 assign buf_b_waddr_o = buf_b_addr;
