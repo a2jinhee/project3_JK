@@ -277,7 +277,6 @@ module DMA_ENGINE
         mm_start_o <= 0;
 
         if (!rst_n) begin
-            count_a <= 0; count_b <= 0;
             mm_start_o <= 0;
 
         end else begin
