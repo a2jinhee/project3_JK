@@ -204,16 +204,6 @@ module DMA_ENGINE
         end else begin
             case (state)
 
-                ADDR_A: begin
-                    if (axi_ar_if.arready)
-                        burst_a <= burst_a + 1;
-                end
-
-                ADDR_B: begin
-                    if (axi_ar_if.arready)
-                        burst_b <= burst_b + 1;
-                end
-
                 LOAD: begin
                     // Write mem data to buffer when handshake && id (A if id==0, B if id==1)
                     // reset count every 128b=16B (burst is 4B*16=64B)
