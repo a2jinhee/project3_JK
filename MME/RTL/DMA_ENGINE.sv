@@ -162,7 +162,6 @@ module DMA_ENGINE
                 // - input: awready
                 done_o = 0;
                 axi_aw_if.awvalid = 1;
-                
                 axi_aw_if.awaddr = mat_c_addr_i; 
 
                 if (axi_aw_if.awready)
@@ -197,9 +196,7 @@ module DMA_ENGINE
                     done_o = 1;
                     state_n = IDLE;
                 end 
-                    
             end
-
         endcase
     end
 
@@ -239,7 +236,6 @@ module DMA_ENGINE
 
                     // buffer A - handshake && id
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
-                        buf_a_addr <= buf_a_addr;
                         buf_a_data <= (buf_a_data << 32) | axi_r_if.rdata;
                         count_a <= count_a + 1;
                     end
@@ -254,7 +250,6 @@ module DMA_ENGINE
                     
                     // buffer B - handshake && id
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
-                        buf_b_addr <= buf_b_addr;
                         buf_b_data <= (buf_b_data << 32) | axi_r_if.rdata;
                         count_b <= count_b + 1;
                     end
