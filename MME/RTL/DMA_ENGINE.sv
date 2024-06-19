@@ -239,9 +239,9 @@ module DMA_ENGINE
             mm_start_o <= 0;
 
         end else begin
+            buf_a_addr <= 0;
+            buf_b_addr <= 0;
             case (state)
-                buf_a_addr <= 0;
-                buf_b_addr <= 0;
 
                 LOAD: begin
                     // Write mem data to buffer when handshake && id (A if id==0, B if id==1)
