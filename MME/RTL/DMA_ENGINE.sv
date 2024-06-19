@@ -60,7 +60,7 @@ module DMA_ENGINE
     reg [BUF_DW-1:0] buf_a_data, buf_b_data;
     reg [BUF_AW-1:0] buf_a_addr, buf_b_addr;
     reg [2:0] count_a, count_b;
-    reg [4:0] count_c; 
+    reg [4:0] count_c; count_c_n; 
     reg [1:0] burst_a, burst_b; 
     reg [1:0] burst_a_n, burst_b_n;
 
@@ -75,21 +75,26 @@ module DMA_ENGINE
         if (!rst_n) begin
             state <= IDLE;
             burst_a <= 0; burst_b <= 0;
+            count_c <= 0;
         end else begin
             state <= state_n;
             burst_a <= burst_a_n; burst_b <= burst_b_n;
+            count_c <= count_c_n;
         end
         
     always_comb begin 
         state_n = state;
         burst_a_n = burst_a; burst_b_n = burst_b;
+        count_c_n = count_c;
         
         // AXI interface AR channel
-        axi_ar_if.arvalid = 0;
+        axi_ar_if.arlen = 15; axi_ar_if.arsize = 4; axi_ar_if.arburst = 1;
+        axi_ar_if.arid = 0; axi_ar_if.arvalid = 0;
 
         // AXI interface AW channel
-        axi_aw_if.awvalid = 0; 
-        
+        axi_aw_if.awvalid = 0; axi_aw_if.awlen = 15; axi_aw_if.awsize = 4;
+        axi_aw_if.awburst = 1; axi_aw_if.awid = 0;
+
         // AXI interface W channel
         axi_w_if.wvalid = 0; axi_w_if.wlast = 0; axi_w_if.wid = 0; axi_w_if.wstrb = 'hf;
 
@@ -194,12 +199,20 @@ module DMA_ENGINE
                 axi_w_if.wvalid = 1;
                 axi_b_if.bready = 1;
 
+                // update counter when handshake
                 if (axi_w_if.wready && axi_w_if.wvalid) begin
                     axi_w_if.wdata = accum_i[count_c / 4][count_c % 4];
+                    count_c_n = count_c + 1;
                 end
 
                 // send last signal on last write
-                axi_w_if.wlast = (count_c == 15) ? 1 : 0;
+                if (count_c == 15) begin
+                    axi_w_if.wlast = 1;
+                    count_c_n = 0;
+                end
+                else begin
+                    axi_w_if.wlast = 0;
+                end
 
                 // B channel handshake
                 if (axi_b_if.bready & axi_b_if.bvalid) begin
@@ -273,17 +286,6 @@ module DMA_ENGINE
                 WRITE_C: begin
                     buf_a_addr <= 0;
                     buf_b_addr <= 0;
-                    // update counter when handshake
-                    if (axi_w_if.wready && axi_w_if.wvalid) begin
-                        count_c <= count_c + 1;
-                    end
-
-                    if (count_c == 15) begin
-                        count_c <= 0; 
-                    end
-                    // don't update done here. 
-                    // if (axi_b_if.bready && axi_b_if.bvalid)
-                    //     done_o <= 1;
                 end
             endcase
         end
