@@ -104,13 +104,11 @@ module DMA_ENGINE
         // AXI interface R channel
         axi_r_if.rready = 0;
         done_o = 1;
-        mm_start_o = 0;
 
         case (state)
             IDLE: begin
                 if (start_i) begin
                     done_o = 0;
-                    mm_start_o = 0;
                     state_n = ADDR_A;
                     burst_a_n = 0; burst_b_n = 0;
                 end
@@ -121,7 +119,6 @@ module DMA_ENGINE
                 // - output: arvalid, arid, araddr, arlen, arsize, arburst
                 // - input: arready
                 done_o = 0;
-                mm_start_o = 0;
                 axi_ar_if.arvalid = 1;
                 axi_ar_if.arid = 0; 
                 axi_ar_if.araddr = mat_a_addr_i + (burst_a * 64); 
@@ -141,7 +138,6 @@ module DMA_ENGINE
                 // - output: arvalid, arid, araddr, arlen, arsize, arburst
                 // - input: arready
                 done_o = 0;
-                mm_start_o = 0;
                 axi_ar_if.arvalid = 1;
                 axi_ar_if.arid = 1;
                 axi_ar_if.araddr = mat_b_addr_i + (burst_b * 64); 
@@ -161,27 +157,24 @@ module DMA_ENGINE
                 // - output: rready
                 // - input: rvalid, rid, rdata, rlast
                 done_o = 0;
-                mm_start_o = 0;
                 axi_r_if.rready = 1;
-                
                 if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
                     state_n = WAIT_MM;
             end
             WAIT_MM: begin
-                mm_start_o = 1;
                 done_o = 0;
                 if (mm_start_o)
                     state_n = WAIT_MM;
 
-                if (mm_done_i)
+                if (mm_done_i && !mm_start_o)
                     state_n = ADDR_C;
+                
             end
             ADDR_C: begin
                 // AW CHANNEL
                 // - output: awvalid, awid, awaddr, awlen, awsize, awburst
                 // - input: awready
                 done_o = 0;
-                mm_start_o = 0;
                 axi_aw_if.awvalid = 1;
                 
                 axi_aw_if.awaddr = mat_c_addr_i; 
@@ -203,7 +196,6 @@ module DMA_ENGINE
                 // - output: bready
                 // - input: bvalid, bid, bresp
                 done_o = 0;
-                mm_start_o = 0;
                 axi_w_if.wvalid = 1;
                 axi_b_if.bready = 1;
 
@@ -237,12 +229,14 @@ module DMA_ENGINE
     always @(posedge clk) begin
 
         buf_a_wren_o <= 0; buf_b_wren_o <= 0;
+        mm_start_o <= 0;
 
         if (!rst_n) begin
 
             buf_a_addr <= 0; buf_b_addr <= 0;
             buf_a_data <= 0; buf_b_data <= 0;
-            count_a <= 0; count_b <= 0;
+            count_a <= 0; count_b <= 0; count_c <= 0;
+            mm_start_o <= 0;
 
         end else begin
             case (state)
@@ -283,6 +277,9 @@ module DMA_ENGINE
 
                     if (buf_b_wren_o)
                         buf_b_addr <= buf_b_addr + 1;
+                    
+                    if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
+                        mm_start_o <= 1;
                     
                 end
 
