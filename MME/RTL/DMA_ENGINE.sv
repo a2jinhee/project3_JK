@@ -240,6 +240,8 @@ module DMA_ENGINE
 
         end else begin
             case (state)
+                buf_a_addr <= 0;
+                buf_b_addr <= 0;
 
                 LOAD: begin
                     // Write mem data to buffer when handshake && id (A if id==0, B if id==1)
@@ -281,11 +283,6 @@ module DMA_ENGINE
                     if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
                         mm_start_o <= 1;
                     
-                end
-
-                WRITE_C: begin
-                    buf_a_addr <= 0;
-                    buf_b_addr <= 0;
                 end
             endcase
         end
