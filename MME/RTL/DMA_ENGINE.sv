@@ -53,8 +53,9 @@ module DMA_ENGINE
                 ADDR_B      = 3'b010,
                 LOAD        = 3'b011,
                 WAIT_MM     = 3'b100,
-                ADDR_C      = 3'b101,
-                WRITE_C     = 3'b110;
+                // ADDR_C      = 3'b101,
+                // WRITE_C     = 3'b110;
+                WRITE_C     = 3'b101;
 
     reg [2:0] state, state_n;
     reg [BUF_DW-1:0] buf_a_data, buf_b_data;
@@ -153,10 +154,33 @@ module DMA_ENGINE
                     state_n = WAIT_MM;
 
                 if (mm_done_i && !mm_start_o)
-                    state_n = ADDR_C;
+                    state_n = WRITE_C;
                 
             end
-            ADDR_C: begin
+            // ADDR_C: begin
+            //     // AW CHANNEL
+            //     // - output: awvalid, awid, awaddr, awlen, awsize, awburst
+            //     // - input: awready
+            //     done_o = 0;
+            //     axi_aw_if.awvalid = 1;
+                
+            //     axi_aw_if.awaddr = mat_c_addr_i; 
+
+            //     if (axi_aw_if.awready)
+            //         axi_aw_if.awvalid = 0; 
+            //     else
+            //         state_n = ADDR_C;
+
+            //     if (!axi_aw_if.awvalid && axi_aw_if.awready)
+            //         state_n = WRITE_C;
+            // end
+            WRITE_C: begin
+                // W CHANNEL
+                // - output: wvalid, wid, wdata, wlast
+                // - input: wready
+                // B CHANNEL
+                // - output: bready
+                // - input: bvalid, bid, bresp
                 // AW CHANNEL
                 // - output: awvalid, awid, awaddr, awlen, awsize, awburst
                 // - input: awready
@@ -172,16 +196,7 @@ module DMA_ENGINE
 
                 if (!axi_aw_if.awvalid && axi_aw_if.awready)
                     state_n = WRITE_C;
-
-            end
-            WRITE_C: begin
-                // W CHANNEL
-                // - output: wvalid, wid, wdata, wlast
-                // - input: wready
-                // B CHANNEL
-                // - output: bready
-                // - input: bvalid, bid, bresp
-                done_o = 0;
+                
                 axi_w_if.wvalid = 1;
                 axi_b_if.bready = 1;
 
