@@ -201,6 +201,8 @@ module DMA_ENGINE
 
                 if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
                     state_n = WAIT_MM;
+                    buf_a_addr_n = 0; 
+                    buf_b_addr_n = 0;
             end
             WAIT_MM: begin
                 done_o = 0;
@@ -236,8 +238,6 @@ module DMA_ENGINE
                 // B CHANNEL
                 // - output: bready
                 // - input: bvalid, bid, bresp
-                buf_a_addr = 0; 
-                buf_b_addr = 0;
                 done_o = 0;
                 axi_w_if.wvalid = 1;
                 axi_b_if.bready = 1;
