@@ -59,9 +59,9 @@ module DMA_ENGINE
     reg [2:0] state, state_n;
     reg [BUF_DW-1:0] buf_a_data, buf_b_data;
     reg [BUF_AW-1:0] buf_a_addr, buf_b_addr;
-    reg [2:0] count_a, count_b;
-    reg [4:0] count_c; 
+    reg [5:0] count_a, count_b, count_c; 
     reg [3:0] burst_a, burst_b; 
+
 
     // Read matrix A from memory and store into buffer A
     // Read matrix B from memory and store into buffer B
@@ -162,6 +162,7 @@ module DMA_ENGINE
                 // - input: awready
                 done_o = 0;
                 axi_aw_if.awvalid = 1;
+                
                 axi_aw_if.awaddr = mat_c_addr_i; 
 
                 if (axi_aw_if.awready)
@@ -194,9 +195,12 @@ module DMA_ENGINE
                 // B channel handshake
                 if (axi_b_if.bready & axi_b_if.bvalid) begin
                     done_o = 1;
-                    state_n = IDLE;
                 end 
+
+                if (done_o)
+                    state_n = IDLE;
             end
+
         endcase
     end
 
@@ -205,8 +209,6 @@ module DMA_ENGINE
 
         buf_a_wren_o <= 0; buf_b_wren_o <= 0;
         mm_start_o <= 0;
-        buf_a_wbyteenable_o <= 'hffff;
-        buf_b_wbyteenable_o <= 'hffff;
 
         if (!rst_n) begin
 
@@ -235,15 +237,11 @@ module DMA_ENGINE
                     // set buffer write enable to 1 every 128b=16B
 
                     // buffer A - handshake && id
-                    if (axi_r_if.rready && axi_r_if.rvalid) begin
-                        if (axi_r_if.rid == 0) begin
-                            buf_a_data <= (buf_a_data << 32) | axi_r_if.rdata;
-                            count_a <= count_a + 1;
-                        end
-                        else if (axi_r_if.rid == 1) begin
-                            buf_b_data <= (buf_b_data << 32) | axi_r_if.rdata;
-                            count_b <= count_b + 1;
-                        end
+                    if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
+                        buf_a_wbyteenable_o <= 'hffff;
+                        buf_a_addr <= buf_a_addr;
+                        buf_a_data <= (buf_a_data << 32) | axi_r_if.rdata;
+                        count_a <= count_a + 1;
                     end
 
                     if (count_a == 3) begin
@@ -254,6 +252,14 @@ module DMA_ENGINE
                     if (buf_a_wren_o)
                         buf_a_addr <= buf_a_addr + 1;
                     
+                    // buffer B - handshake && id
+                    if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
+                        buf_b_wbyteenable_o <= 'hffff;
+                        buf_b_addr <= buf_b_addr;
+                        buf_b_data <= (buf_b_data << 32) | axi_r_if.rdata;
+                        count_b <= count_b + 1;
+                    end
+
                     if (count_b == 3) begin
                         buf_b_wren_o <= 1;
                         count_b <= 0;
@@ -280,7 +286,7 @@ module DMA_ENGINE
                         burst_a <= 0; 
                         burst_b <= 0;
                     end
-                    // don't update done here. 
+                    // don't update down here. 
                     // if (axi_b_if.bready && axi_b_if.bvalid)
                     //     done_o <= 1;
                 end
