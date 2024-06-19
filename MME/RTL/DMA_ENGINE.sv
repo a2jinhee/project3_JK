@@ -109,7 +109,7 @@ module DMA_ENGINE
                 // - output: arvalid, arid, araddr, arlen, arsize, arburst
                 // - input: arready
                 done_o = 0;
-                if axi_ar_if.araddr==0
+                if (axi_ar_if.araddr==0)
                     burst_a = 0;
                 axi_ar_if.arvalid = 1;
                 axi_ar_if.arid = 0; 
