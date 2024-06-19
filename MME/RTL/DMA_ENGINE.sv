@@ -163,6 +163,7 @@ module DMA_ENGINE
                     state_n = WAIT_MM;
             end
             WAIT_MM: begin
+                mm_start_o = 1;
                 done_o = 0;
                 if (mm_start_o)
                     state_n = WAIT_MM;
@@ -230,14 +231,12 @@ module DMA_ENGINE
     always @(posedge clk) begin
 
         buf_a_wren_o <= 0; buf_b_wren_o <= 0;
-        mm_start_o <= 0;
 
         if (!rst_n) begin
 
             buf_a_addr <= 0; buf_b_addr <= 0;
             buf_a_data <= 0; buf_b_data <= 0;
             count_a <= 0; count_b <= 0;
-            mm_start_o <= 0;
 
         end else begin
             case (state)
@@ -278,9 +277,6 @@ module DMA_ENGINE
 
                     if (buf_b_wren_o)
                         buf_b_addr <= buf_b_addr + 1;
-                    
-                    if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
-                        mm_start_o <= 1;
                     
                 end
 
