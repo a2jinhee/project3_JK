@@ -254,7 +254,6 @@ module DMA_ENGINE
     // Counters and addresses
     always @(posedge clk) begin
 
-        buf_a_wren_o <= 0; buf_b_wren_o <= 0;
         mm_start_o <= 0;
 
         if (!rst_n) begin
