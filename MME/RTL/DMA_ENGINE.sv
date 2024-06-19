@@ -239,7 +239,6 @@ module DMA_ENGINE
 
                     // buffer A - handshake && id
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
-                        
                         buf_a_addr <= buf_a_addr;
                         buf_a_data <= (buf_a_data << 32) | axi_r_if.rdata;
                         count_a <= count_a + 1;
@@ -255,7 +254,6 @@ module DMA_ENGINE
                     
                     // buffer B - handshake && id
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
-                        
                         buf_b_addr <= buf_b_addr;
                         buf_b_data <= (buf_b_data << 32) | axi_r_if.rdata;
                         count_b <= count_b + 1;
