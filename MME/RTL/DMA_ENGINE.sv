@@ -122,8 +122,6 @@ always_comb begin
 
     // solve latch issues
     axi_ar_if.araddr = 0;
-    buf_a_data = 0; 
-    buf_b_data = 0; 
 
     case (state)
         IDLE: begin
