@@ -78,20 +78,39 @@ module DMA_ENGINE
         
     always_comb begin 
         state_n = state;
+        axi_ar_if.arlen = 15;
+        axi_ar_if.arsize = 4;
+        axi_ar_if.arburst = 1;
+        axi_ar_if.arid = 0;
+        axi_ar_if.arvalid = 0;
+        axi_aw_if.awvalid = 0;
+        axi_aw_if.awlen = 15;
+        axi_aw_if.awsize = 4;
+        axi_aw_if.awburst = 1;
+        axi_aw_if.awid = 0;
+        axi_w_if.wvalid = 0;
+        axi_w_if.wlast = 0;
+        axi_w_if.wid = 0;
+        axi_w_if.wstrb = 'hf;
+        axi_b_if.bready = 0;
+        axi_r_if.rready = 0;
+        done_o = 1;
+
 
         case (state)
             IDLE: begin
-                if (start_i)
+                if (start_i) begin
+                    done_o = 0;
                     state_n = ADDR_A;
+                end
+            
             end
             ADDR_A: begin
                 // AR CHANNEL
                 // - output: arvalid, arid, araddr, arlen, arsize, arburst
                 // - input: arready
+                done_o = 0;
                 axi_ar_if.arvalid = 1;
-                axi_ar_if.arlen = 15;
-                axi_ar_if.arsize = 4;
-                axi_ar_if.arburst = 1;
                 axi_ar_if.arid = 0; 
                 axi_ar_if.araddr = mat_a_addr_i + (burst_a * 64); 
 
@@ -107,10 +126,8 @@ module DMA_ENGINE
                 // AR CHANNEL
                 // - output: arvalid, arid, araddr, arlen, arsize, arburst
                 // - input: arready
+                done_o = 0;
                 axi_ar_if.arvalid = 1;
-                axi_ar_if.arlen = 15;
-                axi_ar_if.arsize = 4;
-                axi_ar_if.arburst = 1;
                 axi_ar_if.arid = 1;
                 axi_ar_if.araddr = mat_b_addr_i + (burst_b * 64); 
 
@@ -126,11 +143,13 @@ module DMA_ENGINE
                 // R CHANNEL
                 // - output: rready
                 // - input: rvalid, rid, rdata, rlast
+                done_o = 0;
                 axi_r_if.rready = 1;
                 if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
                     state_n = WAIT_MM;
             end
             WAIT_MM: begin
+                done_o = 0;
                 if (mm_start_o)
                     state_n = WAIT_MM;
 
@@ -142,11 +161,9 @@ module DMA_ENGINE
                 // AW CHANNEL
                 // - output: awvalid, awid, awaddr, awlen, awsize, awburst
                 // - input: awready
+                done_o = 0;
                 axi_aw_if.awvalid = 1;
-                axi_aw_if.awlen = 15;
-                axi_aw_if.awsize = 4;
-                axi_aw_if.awburst = 1;
-                axi_aw_if.awid = 0;
+                
                 axi_aw_if.awaddr = mat_c_addr_i; 
 
                 if (axi_aw_if.awready)
@@ -165,10 +182,10 @@ module DMA_ENGINE
                 // B CHANNEL
                 // - output: bready
                 // - input: bvalid, bid, bresp
+                done_o = 0;
 
                 axi_w_if.wvalid = 1;
-                axi_w_if.wid = 0;
-                axi_w_if.wstrb = 'hf;
+                
 
                 axi_b_if.bready = 1;
 
@@ -181,8 +198,11 @@ module DMA_ENGINE
                 else
                     axi_w_if.wlast = 0;
 
+                if (axi_b_if.bready & axi_b_if.bvalid) begin
+                    done_o = 1;
+                end 
 
-                if (axi_b_if.bready && axi_b_if.bvalid)
+                if (done_o)
                     state_n = IDLE;
             end
 
@@ -195,7 +215,7 @@ module DMA_ENGINE
         buf_a_wren_o <= 0;
         buf_b_wren_o <= 0;
         mm_start_o <= 0;
-        done_o <= 0; 
+        // done_o <= 0; 
 
         if (!rst_n) begin
 
@@ -265,16 +285,21 @@ module DMA_ENGINE
                 end
 
                 WRITE_C: begin
+                    buf_a_addr <= 0;
+                    buf_b_addr <= 0;
                     if (axi_w_if.wready && axi_w_if.wvalid) begin
                         count_c <= count_c + 1;
                     end
 
                     if (count_c == 15) begin
-                        done_o <= 1;
                         count_c <= 0; 
                         burst_a <= 0; 
                         burst_b <= 0;
                     end
+
+                    // if (axi_b_if.bready && axi_b_if.bvalid) begin
+                    //     done_o <= 1;
+                    // end
                 end
             endcase
         end
