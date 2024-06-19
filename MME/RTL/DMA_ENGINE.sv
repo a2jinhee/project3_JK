@@ -59,7 +59,7 @@ module DMA_ENGINE
     reg [2:0] state, state_n;
     reg [BUF_DW-1:0] buf_a_data, buf_b_data;
     reg [BUF_AW-1:0] buf_a_addr, buf_b_addr;
-    reg [2:0] count_a, count_b;
+    reg [2:0] count_a, count_b, count_a_n, count_b_n;
     reg [4:0] count_c, count_c_n; 
     reg [1:0] burst_a, burst_b; 
     reg [1:0] burst_a_n, burst_b_n;
@@ -76,16 +76,19 @@ module DMA_ENGINE
             state <= IDLE;
             burst_a <= 0; burst_b <= 0;
             count_c <= 0;
+            count_a <= 0; count_b <= 0;
         end else begin
             state <= state_n;
             burst_a <= burst_a_n; burst_b <= burst_b_n;
             count_c <= count_c_n;
+            count_a <= count_a_n; count_b <= count_b_n;
         end
         
     always_comb begin 
         state_n = state;
         burst_a_n = burst_a; burst_b_n = burst_b;
         count_c_n = count_c;
+        count_a_n = count_a; count_b_n = count_b;
         
         // AXI interface AR channel
         axi_ar_if.arlen = 15; axi_ar_if.arsize = 4; axi_ar_if.arburst = 1;
@@ -160,6 +163,24 @@ module DMA_ENGINE
                 // - input: rvalid, rid, rdata, rlast
                 done_o = 0;
                 axi_r_if.rready = 1;
+
+                if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
+                    count_a_n = count_a + 1;
+                end
+
+                if (count_a == 3) begin
+                    count_a_n = 0;
+                end
+
+                if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
+                    count_b_n = count_b + 1;
+                end
+
+                if (count_b == 3) begin
+                    count_b_n = 0;
+                end
+
+
                 if ((buf_a_addr == mat_width_i) && (buf_b_addr == mat_width_i))
                     state_n = WAIT_MM;
             end
@@ -237,7 +258,6 @@ module DMA_ENGINE
 
             buf_a_addr <= 0; buf_b_addr <= 0;
             buf_a_data <= 0; buf_b_data <= 0;
-            count_a <= 0; count_b <= 0;
             mm_start_o <= 0;
 
         end else begin
@@ -252,12 +272,10 @@ module DMA_ENGINE
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 0) begin
                         buf_a_addr <= buf_a_addr;
                         buf_a_data <= (buf_a_data << 32) | axi_r_if.rdata;
-                        count_a <= count_a + 1;
                     end
 
                     if (count_a == 3) begin
                         buf_a_wren_o <= 1;
-                        count_a <= 0;
                     end
 
                     if (buf_a_wren_o)
@@ -267,12 +285,10 @@ module DMA_ENGINE
                     if (axi_r_if.rready && axi_r_if.rvalid && axi_r_if.rid == 1) begin
                         buf_b_addr <= buf_b_addr;
                         buf_b_data <= (buf_b_data << 32) | axi_r_if.rdata;
-                        count_b <= count_b + 1;
                     end
 
                     if (count_b == 3) begin
                         buf_b_wren_o <= 1;
-                        count_b <= 0;
                     end
 
                     if (buf_b_wren_o)
