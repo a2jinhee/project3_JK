@@ -77,7 +77,7 @@ addrmap MME_CFG {
                 Software must not initiate a MM when this field is 0.";
             sw = r;
 			hw = w; // check
-            reset = 1'b1; 
+            reset = 1'b0; 
         } done;
     } MME_STATUS @0x210;		
 
