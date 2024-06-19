@@ -166,7 +166,7 @@ always_comb begin
             else
                 state_n = ADDR_B;
 
-            if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_b == (mat_width_i / 4 - 1))
+            if (!axi_ar_if.arvalid && axi_ar_if.arready && burst_b_n == (mat_width_i / 4 - 1))
                 state_n = LOAD;
         end
         LOAD: begin
